@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ProxyProject_Backend.Database;
 using ProxyProject_Backend.Models.Entities;
+using ProxyProject_Backend.Services;
+using ProxyProject_Backend.Services.Interface;
 using System.Text;
 
 namespace ProxyProject_Backend
@@ -76,6 +78,9 @@ namespace ProxyProject_Backend
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddScoped<IEmailService, EmailService>();
+
 
             var app = builder.Build();
 

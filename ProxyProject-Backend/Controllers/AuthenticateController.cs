@@ -4,11 +4,11 @@ using Microsoft.IdentityModel.Tokens;
 using ProxyProject_Backend.Models.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
+using ProxyProject_Backend.Services.Interface;
 using ProxyProject_Backend.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -16,65 +16,106 @@ namespace ProxyProject_Backend.Controllers
     [ApiController]
     public class AuthenticateController : ControllerBase
     {
-        private readonly UserManager<UserEntity> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly UserManager<UserEntity> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
         public AuthenticateController(
             UserManager<UserEntity> userManager, 
-            RoleManager<IdentityRole> roleManager, 
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailService emailService)
         {
-            this.userManager = userManager;
-            this.roleManager = roleManager;
+            _userManager = userManager;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(model.Username);
 
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                var userRoles = await userManager.GetRolesAsync(user);
+                if(user.TwoFactorEnabled)
+                {
+                    var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+                    var emailResult = await _emailService.SendMailAsync(_configuration["EmailConfig:MFASubject"], 
+                        $"<p>Your login verify code: {token}</p>", user.Email);
 
-                var authClaims = new List<Claim>
+                    if (emailResult)
+                    {
+                        return Ok(new ResponseModel { Status = "Success", Message = "User logged in successfully!" });
+                    } 
+                    else
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            new ResponseModel { Status = "Error", Message = "Send MFA email failed.Please check user details and try again." });
+                    }
+                }
+                else
+                {
+                    var result = await AuthenticateUserAsync(user);
+                    return Ok(result);
+                }
+            }
+
+            return Unauthorized();
+        }
+
+        [HttpPost]
+        [Route("VerifyMFA")]
+        public async Task<IActionResult> VerifyMFA([FromBody] VerifyMFAModel model)
+        {
+            var user = await _userManager.FindByNameAsync(model.Username);
+
+            if (user != null && await _userManager.VerifyTwoFactorTokenAsync(user, Constants.MFAProvider, model.Code))
+            {
+                var result = await AuthenticateUserAsync(user);
+                return Ok(result);
+            }
+
+            return Unauthorized();
+        }
+
+        private async Task<object> AuthenticateUserAsync(UserEntity user)
+        {
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var authClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["JWT:ValidIssuer"],
-                    audience: _configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddHours(1),
-                    claims: authClaims,
-                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                    );
-
-                return Ok(new
-                {
-                    Token = new JwtSecurityTokenHandler().WriteToken(token),
-                    Expiration = token.ValidTo
-                });
+            foreach (var userRole in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
-            return Unauthorized();
+
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddHours(1),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                );
+
+            return new
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Expiration = token.ValidTo
+            };
         }
 
         [HttpPost]
         [Route("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var userExists = await userManager.FindByNameAsync(model.UserName);
+            var userExists = await _userManager.FindByNameAsync(model.UserName);
 
             if (userExists != null)
             {
@@ -92,7 +133,7 @@ namespace ProxyProject_Backend.Controllers
                 TwoFactorEnabled = true
             };
 
-            var result = await userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, 
