@@ -34,7 +34,7 @@ namespace ProxyProject_Backend.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(model.UserName);
 
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
@@ -46,7 +46,7 @@ namespace ProxyProject_Backend.Controllers
 
                     if (emailResult)
                     {
-                        return Ok(new ResponseModel { Status = "Success", Message = "User logged in successfully!" });
+                        return Ok(new ResponseModel { Status = "Success", Message = "Send MFA email successfully!" });
                     } 
                     else
                     {
@@ -68,7 +68,7 @@ namespace ProxyProject_Backend.Controllers
         [Route("VerifyMFA")]
         public async Task<IActionResult> VerifyMFA([FromBody] VerifyMFAModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(model.UserName);
 
             if (user != null && await _userManager.VerifyTwoFactorTokenAsync(user, Constants.MFAProvider, model.Code))
             {
@@ -77,6 +77,55 @@ namespace ProxyProject_Backend.Controllers
             }
 
             return Unauthorized();
+        }
+
+        [HttpPost]
+        [Route("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var forgotPasswordLink = $"{_configuration["EmailConfig:ForgotPasswordLink"]}?username={user.UserName}&code={token}";
+                var emailResult = await _emailService.SendMailAsync(_configuration["EmailConfig:ForgotPasswordSubject"],
+                        $"<p>Please follow this link to reset your password: {forgotPasswordLink}</p>", user.Email);
+
+                if (emailResult)
+                {
+                    return Ok(new ResponseModel { Status = "Success", Message = "Send reset password email successfully!" });
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new ResponseModel { Status = "Error", Message = "Send reset password email failed.Please check user details and try again." });
+                }
+            }
+
+            return BadRequest("User not found");
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            if (user != null)
+            {
+                var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+
+                if(result.Succeeded)
+                {
+                    return Ok(new ResponseModel { Status = "Success", Message = "Your password has been reset successfully!" });
+                }
+                else
+                {
+                    return BadRequest("Error when reset password");
+                }
+            }
+
+            return BadRequest("User not found");
         }
 
         private async Task<object> AuthenticateUserAsync(UserEntity user)
@@ -99,7 +148,7 @@ namespace ProxyProject_Backend.Controllers
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.Now.AddMinutes(int.Parse(_configuration["JWT:Expires"])),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );

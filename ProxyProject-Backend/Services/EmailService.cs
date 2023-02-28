@@ -20,13 +20,13 @@ namespace ProxyProject_Backend.Services
             {
                 var smtpClient = new SmtpClient(_configuration["Smtp:Host"], int.Parse(_configuration["Smtp:Port"]))
                 {
-                    Credentials = new NetworkCredential(_configuration["Smtp:Username"], _configuration["Smtp:Password"]),
+                    Credentials = new NetworkCredential(_configuration["Smtp:UserName"], _configuration["Smtp:Password"]),
                     EnableSsl = true,
                 };
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(_configuration["Smtp:Username"]),
+                    From = new MailAddress(_configuration["Smtp:UserName"]),
                     Subject = subject,
                     Body = body,
                     IsBodyHtml = true,

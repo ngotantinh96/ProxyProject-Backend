@@ -2,17 +2,14 @@
 
 namespace ProxyProject_Backend.Models.RequestModels
 {
-    public class RegisterModel
+    public class ResetPasswordModel
     {
         [Required(ErrorMessage = "UserName is required")]
         public string UserName { get; set; }
 
-        [EmailAddress]
-        [Required(ErrorMessage = "Email is required")]
-        public string Email { get; set; }
-
+        [Required(ErrorMessage = "Code is required")]
+        public string Code { get; set; }
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
-
     }
 }
