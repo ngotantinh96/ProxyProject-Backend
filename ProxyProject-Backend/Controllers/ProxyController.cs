@@ -18,7 +18,7 @@ namespace ProxyProject_Backend.Controllers
         {
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("GetProxies")]
         public async Task<IActionResult> GetProxies()
         {
