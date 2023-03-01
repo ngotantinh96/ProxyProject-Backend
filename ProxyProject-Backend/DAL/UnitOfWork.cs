@@ -10,17 +10,17 @@ namespace ProxyProject_Backend.DAL
             _context = context;
         }
 
-        private GenericRepository<ProxyEntity> _proxyRepository;
+        private GenericRepository<ProxyPlanEntity> _proxyPlanRepository;
 
-        public GenericRepository<ProxyEntity> ProxyRepository
+        public GenericRepository<ProxyPlanEntity> ProxyPlanRepository
         {
             get
             {
-                if (_proxyRepository == null)
+                if (_proxyPlanRepository == null)
                 {
-                    _proxyRepository = new GenericRepository<ProxyEntity>(_context);
+                    _proxyPlanRepository = new GenericRepository<ProxyPlanEntity>(_context);
                 }
-                return _proxyRepository;
+                return _proxyPlanRepository;
             }
         }
 

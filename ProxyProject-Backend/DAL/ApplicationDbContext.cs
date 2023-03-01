@@ -16,7 +16,7 @@ namespace ProxyProject_Backend.DAL
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<ProxyEntity>().HasData(new ProxyEntity 
+            builder.Entity<ProxyPlanEntity>().HasData(new ProxyPlanEntity 
             { 
                 Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
                 Name = "Key Vip",
@@ -26,6 +26,6 @@ namespace ProxyProject_Backend.DAL
             });
         }
 
-        public DbSet<ProxyEntity> ProxyEntities { get; set; }
+        public DbSet<ProxyPlanEntity> ProxyPlanEntities { get; set; }
     }
 }

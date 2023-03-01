@@ -1,6 +1,6 @@
 ﻿namespace ProxyProject_Backend.DAL.Entities
 {
-    public class ProxyEntity : CoreEntity
+    public class ProxyPlanEntity : CoreEntity
     {
         public string Name { get; set; }
         public decimal Price { get; set; }
