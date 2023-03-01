@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using ProxyProject_Backend.Database;
-using ProxyProject_Backend.Models.Entities;
+using ProxyProject_Backend.DAL;
+using ProxyProject_Backend.DAL.Entities;
+using ProxyProject_Backend.DAL.Interface;
 using ProxyProject_Backend.Services;
 using ProxyProject_Backend.Services.Interface;
 using System.Text;
@@ -107,6 +107,9 @@ namespace ProxyProject_Backend
                 });
             });
 
+            // Repositories
+
+            //Services
             builder.Services.AddScoped<IEmailService, EmailService>();
 
 

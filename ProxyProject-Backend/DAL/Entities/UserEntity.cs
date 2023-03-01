@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ProxyProject_Backend.Models.Entities
+namespace ProxyProject_Backend.DAL.Entities
 {
     public class UserEntity : IdentityUser
     {

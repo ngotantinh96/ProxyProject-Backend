@@ -3,7 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProxyProject_Backend.Database;
+using ProxyProject_Backend.DAL;
 
 #nullable disable
 
@@ -147,13 +147,45 @@ namespace ProxyProject_Backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.Models.Entities.UserEntity", b =>
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("PriceUnit")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProxyEntities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
+                            Description = "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội",
+                            Name = "Key Vip",
+                            Price = 16000m,
+                            PriceUnit = "đ/key/ngày"
+                        });
+                });
+
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.UserEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("APIKey")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("AccessFailedCount")
@@ -204,7 +236,6 @@ namespace ProxyProject_Backend.Migrations
                         .HasColumnType("varchar(256)");
 
                     b.Property<string>("WalletKey")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -230,7 +261,7 @@ namespace ProxyProject_Backend.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("ProxyProject_Backend.Models.Entities.UserEntity", null)
+                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -239,7 +270,7 @@ namespace ProxyProject_Backend.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("ProxyProject_Backend.Models.Entities.UserEntity", null)
+                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -254,7 +285,7 @@ namespace ProxyProject_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProxyProject_Backend.Models.Entities.UserEntity", null)
+                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -263,7 +294,7 @@ namespace ProxyProject_Backend.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("ProxyProject_Backend.Models.Entities.UserEntity", null)
+                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

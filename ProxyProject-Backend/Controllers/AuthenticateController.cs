@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using ProxyProject_Backend.Models.Entities;
+using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
 using ProxyProject_Backend.Services.Interface;
@@ -46,18 +46,28 @@ namespace ProxyProject_Backend.Controllers
 
                     if (emailResult)
                     {
-                        return Ok(new ResponseModel { Status = "Success", Message = "Send MFA email successfully!" });
+                        return Ok(new ResponseModel 
+                        { 
+                            Status = "Success", 
+                            Message = "Send MFA email successfully!" 
+                        });
                     } 
                     else
                     {
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                            new ResponseModel { Status = "Error", Message = "Send MFA email failed.Please check user details and try again." });
+                        return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel 
+                        { 
+                            Status = "Error", 
+                            Message = "Send MFA email failed.Please check user details and try again." 
+                        });
                     }
                 }
                 else
                 {
-                    var result = await AuthenticateUserAsync(user);
-                    return Ok(result);
+                    return Ok(new ResponseModel
+                    {
+                        Status = "Success",
+                        Data = await AuthenticateUserAsync(user)
+                    });
                 }
             }
 
@@ -72,8 +82,11 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null && await _userManager.VerifyTwoFactorTokenAsync(user, Constants.MFAProvider, model.Code))
             {
-                var result = await AuthenticateUserAsync(user);
-                return Ok(result);
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = await AuthenticateUserAsync(user)
+                });
             }
 
             return Unauthorized();
@@ -94,12 +107,19 @@ namespace ProxyProject_Backend.Controllers
 
                 if (emailResult)
                 {
-                    return Ok(new ResponseModel { Status = "Success", Message = "Send reset password email successfully!" });
+                    return Ok(new ResponseModel 
+                    { 
+                        Status = "Success", 
+                        Message = "Send reset password email successfully!" 
+                    });
                 }
                 else
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                        new ResponseModel { Status = "Error", Message = "Send reset password email failed.Please check user details and try again." });
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel 
+                        { 
+                            Status = "Error", 
+                            Message = "Send reset password email failed.Please check user details and try again." 
+                        });
                 }
             }
 
@@ -117,17 +137,62 @@ namespace ProxyProject_Backend.Controllers
 
                 if(result.Succeeded)
                 {
-                    return Ok(new ResponseModel { Status = "Success", Message = "Your password has been reset successfully!" });
+                    return Ok(new ResponseModel 
+                    { 
+                        Status = "Success", 
+                        Message = "Your password has been reset successfully!" 
+                    });
                 }
-                else
-                {
-                    return BadRequest("Error when reset password");
-                }
+
+                return BadRequest("Error when reset password");
             }
 
             return BadRequest("User not found");
         }
 
+        [HttpPost]
+        [Route("Register")]
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        {
+            var userExists = await _userManager.FindByNameAsync(model.UserName);
+
+            if (userExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel 
+                {
+                    Status = "Error", 
+                    Message = "User already exists!" 
+                });
+            }
+
+            UserEntity user = new UserEntity()
+            {
+                Email = model.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = model.UserName,
+                APIKey = StringUtils.GenerateSecureKey(),
+                WalletKey = StringUtils.GenerateSecureKey(),
+                TwoFactorEnabled = true
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel 
+                { 
+                    Status = "Error", 
+                    Message = "User creation failed! Please check user details and try again.", Data = result.Errors 
+                });
+            }
+
+            return Ok(new ResponseModel 
+            { 
+                Status = "Success", 
+                Message = "User created successfully!" 
+            });
+        }
+
+        #region Private functions
         private async Task<object> AuthenticateUserAsync(UserEntity user)
         {
             var userRoles = await _userManager.GetRolesAsync(user);
@@ -159,37 +224,6 @@ namespace ProxyProject_Backend.Controllers
                 Expiration = token.ValidTo
             };
         }
-
-        [HttpPost]
-        [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
-        {
-            var userExists = await _userManager.FindByNameAsync(model.UserName);
-
-            if (userExists != null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, 
-                    new ResponseModel { Status = "Error", Message = "User already exists!" });
-            }
-
-            UserEntity user = new UserEntity()
-            {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.UserName,
-                APIKey = StringUtils.GenerateSecureKey(),
-                WalletKey = StringUtils.GenerateSecureKey(),
-                TwoFactorEnabled = true
-            };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, 
-                    new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again.", Data = result.Errors });
-            }
-
-            return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
-        }
+        #endregion
     }
 }
