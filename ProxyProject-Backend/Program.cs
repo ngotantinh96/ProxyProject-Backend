@@ -26,7 +26,15 @@ namespace ProxyProject_Backend
             // For Entity Framework  
 
             var connectionString = builder.Configuration.GetConnectionString("ConnectionString");
-
+            //Configure CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
             builder.Services.AddDbContext<ApplicationDbContext>(
                 dbContextOptions => dbContextOptions
                     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
@@ -122,8 +130,7 @@ namespace ProxyProject_Backend
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
-
+            app.UseCors();
             app.UseAuthorization();
 
 
