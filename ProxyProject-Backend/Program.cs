@@ -132,8 +132,6 @@ namespace ProxyProject_Backend
 
             app.UseCors();
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
