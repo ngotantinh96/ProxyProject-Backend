@@ -9,7 +9,7 @@ using ProxyProject_Backend.Services.Interface;
 
 namespace ProxyProject_Backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/userproxies")]
     [ApiController]
     [Authorize]
     public class ProxyKeyController : ApiBaseController
@@ -46,7 +46,7 @@ namespace ProxyProject_Backend.Controllers
                 var proxyKeyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(model.ProxyKeyPlanId);
                 var totalOrderedAmount = model.NoOfKeys * model.NoOfDates * proxyKeyPlan.Price;
 
-                if(totalOrderedAmount >= user.Balance)
+                if (totalOrderedAmount >= user.Balance)
                 {
                     // Perform orders
                     var listOrderedKey = new List<ProxyKeysEntity>();
@@ -93,15 +93,17 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpGet]
-        [Route("GetPurchasedProxyKeys")]
-        public async Task<IActionResult> GetPurchasedProxyKeys([FromQuery]GetPurchasedProxyKeysModel model)
+        [Route("purchased")]
+        public async Task<IActionResult> GetPurchasedProxyKeys([FromQuery] GetPurchasedProxyKeysModel model)
         {
             var user = await GetCurrentUser();
 
             if (user != null)
             {
                 var purchasedProxyKeys = await _unitOfWork.ProxyKeysRepository
-                    .GetAsync(x => x.UserId == user.Id, x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan", model.Page, model.Take);
+                    .GetAsync(x => x.UserId == user.Id, x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan", model.PageIndex, model.PageSize);
+
+                var count = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id);
 
                 var proxyKeys = purchasedProxyKeys.Select(x => new ProxyKeysModel
                 {
@@ -109,14 +111,15 @@ namespace ProxyProject_Backend.Controllers
                     ProxyKeyPlan = x.ProxyKeyPlan?.Name,
                     ProxyKey = x.Key,
                     ExpireDate = x.ExpireDate,
-                    Status = x.ExpireDate < DateTime.UtcNow ? "Key expired!" : "Key working!",
+                    Status = x.ExpireDate < DateTime.UtcNow ? Enum_StatusKey.WORKING : Enum_StatusKey.EXPIRED,
                     Note = x.Note
                 });
 
                 return Ok(new ResponseModel
                 {
                     Status = "Success",
-                    Data = proxyKeys
+                    Data = proxyKeys,
+                    Total = count
                 });
             }
 
