@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxyProject_Backend.DAL;
 
@@ -10,9 +11,11 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230303070245_AddTableWalletHistory")]
+    partial class AddTableWalletHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -301,18 +304,15 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("WalletKey")
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("WalletKey");
 
                     b.ToTable("WalletHistory");
                 });
@@ -389,7 +389,7 @@ namespace ProxyProject_Backend.Migrations
                 {
                     b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
                         .WithMany("WalletHistories")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("WalletKey");
 
                     b.Navigation("User");
                 });

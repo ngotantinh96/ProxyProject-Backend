@@ -16,7 +16,25 @@ namespace ProxyProject_Backend.DAL
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<ProxyPlanEntity>().HasData(new ProxyPlanEntity 
+
+            // Relationship config
+            builder.Entity<ProxyKeyPlansEntity>()
+                .HasMany(x => x.ProxyKeys)
+                .WithOne(x => x.ProxyKeyPlan)
+                .HasForeignKey(x => x.ProxyKeyPlanId);
+
+            builder.Entity<UserEntity>()
+                .HasMany(x => x.ProxyKeys)
+                .WithOne(x => x.User)
+                .HasForeignKey(x => x.UserId);
+
+            builder.Entity<UserEntity>()
+               .HasMany(x => x.WalletHistories)
+               .WithOne(x => x.User)
+               .HasForeignKey(x => x.UserId);
+
+            // Seed data config
+            builder.Entity<ProxyKeyPlansEntity>().HasData(new ProxyKeyPlansEntity 
             { 
                 Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
                 Name = "Key Vip",
@@ -26,6 +44,8 @@ namespace ProxyProject_Backend.DAL
             });
         }
 
-        public DbSet<ProxyPlanEntity> ProxyPlanEntities { get; set; }
+        public DbSet<ProxyKeyPlansEntity> ProxyKeyPlans { get; set; }
+        public DbSet<ProxyKeysEntity> ProxyKeys { get; set; }
+        public DbSet<WalletHistoryEntity> WalletHistory { get; set; }
     }
 }

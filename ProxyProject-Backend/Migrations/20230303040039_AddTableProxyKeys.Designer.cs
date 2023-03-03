@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxyProject_Backend.DAL;
 
@@ -10,9 +11,11 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230303040039_AddTableProxyKeys")]
+    partial class AddTableProxyKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -289,34 +292,6 @@ namespace ProxyProject_Backend.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.WalletHistoryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<string>("WalletKey")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("WalletHistory");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -385,15 +360,6 @@ namespace ProxyProject_Backend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.WalletHistoryEntity", b =>
-                {
-                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
-                        .WithMany("WalletHistories")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", b =>
                 {
                     b.Navigation("ProxyKeys");
@@ -402,8 +368,6 @@ namespace ProxyProject_Backend.Migrations
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.UserEntity", b =>
                 {
                     b.Navigation("ProxyKeys");
-
-                    b.Navigation("WalletHistories");
                 });
 #pragma warning restore 612, 618
         }

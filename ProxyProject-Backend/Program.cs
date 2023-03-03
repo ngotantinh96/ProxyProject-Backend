@@ -118,8 +118,9 @@ namespace ProxyProject_Backend
             // Repositories
 
             //Services
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-
+            builder.Services.AddScoped<IProxyKeyService, ProxyKeyService>();
 
             var app = builder.Build();
 

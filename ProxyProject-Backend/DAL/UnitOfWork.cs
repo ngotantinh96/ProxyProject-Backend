@@ -10,21 +10,60 @@ namespace ProxyProject_Backend.DAL
             _context = context;
         }
 
-        private GenericRepository<ProxyPlanEntity> _proxyPlanRepository;
+        private GenericRepository<UserEntity> _userRepository;
+        private GenericRepository<ProxyKeyPlansEntity> _proxyKeyPlansRepository;
+        private GenericRepository<ProxyKeysEntity> _proxyKeysRepository;
+        private GenericRepository<WalletHistoryEntity> _walletHistoryRepository;
 
-        public GenericRepository<ProxyPlanEntity> ProxyPlanRepository
+        public GenericRepository<UserEntity> UserRepository
         {
             get
             {
-                if (_proxyPlanRepository == null)
+                if (_userRepository == null)
                 {
-                    _proxyPlanRepository = new GenericRepository<ProxyPlanEntity>(_context);
+                    _userRepository = new GenericRepository<UserEntity>(_context);
                 }
-                return _proxyPlanRepository;
+                return _userRepository;
             }
         }
 
-        public async Task Save()
+        public GenericRepository<ProxyKeyPlansEntity> ProxyKeyPlansRepository
+        {
+            get
+            {
+                if (_proxyKeyPlansRepository == null)
+                {
+                    _proxyKeyPlansRepository = new GenericRepository<ProxyKeyPlansEntity>(_context);
+                }
+                return _proxyKeyPlansRepository;
+            }
+        }
+
+        public GenericRepository<ProxyKeysEntity> ProxyKeysRepository
+        {
+            get
+            {
+                if (_proxyKeysRepository == null)
+                {
+                    _proxyKeysRepository = new GenericRepository<ProxyKeysEntity>(_context);
+                }
+                return _proxyKeysRepository;
+            }
+        }
+
+        public GenericRepository<WalletHistoryEntity> WalletHistoryRepository
+        {
+            get
+            {
+                if (_walletHistoryRepository == null)
+                {
+                    _walletHistoryRepository = new GenericRepository<WalletHistoryEntity>(_context);
+                }
+                return _walletHistoryRepository;
+            }
+        }
+
+        public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }

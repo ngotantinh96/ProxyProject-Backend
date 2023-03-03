@@ -5,6 +5,7 @@ using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
+using ProxyProject_Backend.Services.Interface;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -13,10 +14,15 @@ namespace ProxyProject_Backend.Controllers
     [Authorize]
     public class UserController : ApiBaseController
     {
+        private readonly IUserService _userService;
+
         public UserController(
             ApplicationDbContext context,
-            UserManager<UserEntity> userManager) : base(context, userManager)
+            UserManager<UserEntity> userManager,
+            IUserService userService
+            ) : base(context, userManager)
         {
+            _userService = userService;
         }
 
         [HttpGet]
@@ -35,7 +41,9 @@ namespace ProxyProject_Backend.Controllers
                         UserName = user.UserName,
                         Email = user.Email,
                         APIKey = user.APIKey,
-                        WalletKey = user.WalletKey
+                        WalletKey = user.WalletKey,
+                        Balance = user.Balance,
+                        TotalDeposited = user.TotalDeposited
                     }
                 });
             }
@@ -77,6 +85,29 @@ namespace ProxyProject_Backend.Controllers
                 {
                     Status = "Error",
                     Message = "Current password is incorrect"
+                });
+            }
+
+            return BadRequest("Empty User");
+        }
+
+        [HttpGet]
+        [Route("ReGenerateAPIKey")]
+        public async Task<IActionResult> ReGenerateAPIKey()
+        {
+            var user = await GetCurrentUser();
+
+            if (user != null)
+            {
+                user.APIKey = await _userService.GenerateUserAPIKeyAsync();
+
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.SaveChangesAsync();
+
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = user.APIKey
                 });
             }
 

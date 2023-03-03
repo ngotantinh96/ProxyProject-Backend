@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
+using ProxyProject_Backend.Services;
 using ProxyProject_Backend.Services.Interface;
 using ProxyProject_Backend.Utils;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,15 +19,18 @@ namespace ProxyProject_Backend.Controllers
     {
         private readonly UserManager<UserEntity> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
         private readonly IEmailService _emailService;
 
         public AuthenticateController(
             UserManager<UserEntity> userManager, 
             IConfiguration configuration,
+            IUserService userService,
             IEmailService emailService)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _userService = userService;
             _emailService = emailService;
         }
 
@@ -170,8 +174,8 @@ namespace ProxyProject_Backend.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.UserName,
-                APIKey = StringUtils.GenerateSecureKey(),
-                WalletKey = StringUtils.GenerateSecureKey(),
+                APIKey = await _userService.GenerateUserAPIKeyAsync(),
+                WalletKey = await _userService.GenerateUserWalletKeyAsync(),
                 TwoFactorEnabled = true
             };
 

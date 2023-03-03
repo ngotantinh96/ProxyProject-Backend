@@ -7,12 +7,17 @@ namespace ProxyProject_Backend.DAL.Interface
         Task<IEnumerable<TEntity>> GetAsync(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            string includeProperties = "");
+            string includeProperties = "", int page = 0, int take = 0);
         Task<TEntity> GetByFilterAsync(Expression<Func<TEntity, bool>> filter);
         Task<TEntity> GetByIDAsync(object id);
         Task InsertAsync(TEntity entity);
         void Delete(object id);
         void Delete(TEntity entityToDelete);
         void Update(TEntity entityToUpdate);
+        Task<int> CountByFilterAsync(Expression<Func<TEntity, bool>> filter);
+        Task InsertListAsync(List<TEntity> entities);
+        void DeleteList(List<object> ids);
+        void DeleteList(List<TEntity> entitiesToDelete);
+        void UpdateList(List<TEntity> entitiesToUpdate);
     }
 }

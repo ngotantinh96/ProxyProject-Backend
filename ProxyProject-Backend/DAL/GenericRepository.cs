@@ -18,7 +18,7 @@ namespace ProxyProject_Backend.DAL
         public virtual async Task<IEnumerable<TEntity>> GetAsync(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            string includeProperties = "")
+            string includeProperties = "", int page = 0, int take = 0)
         {
             IQueryable<TEntity> query = _dbSet;
 
@@ -35,11 +35,25 @@ namespace ProxyProject_Backend.DAL
 
             if (orderBy != null)
             {
-                return await orderBy(query).ToListAsync();
+                if(take != 0)
+                {
+                    return await orderBy(query).Skip(page).Take(take).ToListAsync();
+                }
+                else
+                {
+                    return await orderBy(query).Skip(page).ToListAsync();
+                }
             }
             else
             {
-                return await query.ToListAsync();
+                if (take != 0)
+                {
+                    return await query.Skip(page).Take(take).ToListAsync();
+                }
+                else
+                {
+                    return await query.Skip(page).ToListAsync();
+                }
             }
         }
 
@@ -77,6 +91,50 @@ namespace ProxyProject_Backend.DAL
         {
             _dbSet.Attach(entityToUpdate);
             _context.Entry(entityToUpdate).State = EntityState.Modified;
+        }
+
+        public async Task<int> CountByFilterAsync(Expression<Func<TEntity, bool>> filter)
+        {
+            return await _dbSet.CountAsync(filter);
+        }
+
+        public async Task InsertListAsync(List<TEntity> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+        }
+
+        public void DeleteList(List<object> ids)
+        {
+            var entitiesToDelete = new List<TEntity>();
+
+            ids.ForEach(id =>
+            {
+                entitiesToDelete.Add(_dbSet.Find(ids));
+            });
+
+            DeleteList(entitiesToDelete);
+        }
+
+        public void DeleteList(List<TEntity> entitiesToDelete)
+        {
+            entitiesToDelete.ForEach(entityToDelete =>
+            {
+                if (_context.Entry(entityToDelete).State == EntityState.Detached)
+                {
+                    _dbSet.Attach(entityToDelete);
+                }
+            });
+
+            _dbSet.RemoveRange(entitiesToDelete);
+        }
+
+        public void UpdateList(List<TEntity> entitiesToUpdate)
+        {
+            entitiesToUpdate.ForEach(entityToUpdate =>
+            {
+                _dbSet.Attach(entityToUpdate);
+                _context.Entry(entityToUpdate).State = EntityState.Modified;
+            });
         }
     }
 }
