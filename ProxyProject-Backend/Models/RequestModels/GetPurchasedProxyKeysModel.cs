@@ -2,7 +2,8 @@
 {
     public class GetPurchasedProxyKeysModel
     {
-        public int Page { get; set; } = 0;
-        public int Take { get; set; } = 10;
+        public string Keyword { get; set; }
+        public int PageIndex { get; set; } = 0;
+        public int PageSize { get; set; } = 10;
     }
 }
