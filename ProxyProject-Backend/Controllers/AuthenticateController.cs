@@ -18,17 +18,20 @@ namespace ProxyProject_Backend.Controllers
     public class AuthenticateController : ControllerBase
     {
         private readonly UserManager<UserEntity> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
 
         public AuthenticateController(
-            UserManager<UserEntity> userManager, 
+            UserManager<UserEntity> userManager,
+            RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
             IUserService userService,
             IEmailService emailService)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _configuration = configuration;
             _userService = userService;
             _emailService = emailService;
@@ -176,7 +179,8 @@ namespace ProxyProject_Backend.Controllers
                 UserName = model.UserName,
                 APIKey = await _userService.GenerateUserAPIKeyAsync(),
                 WalletKey = await _userService.GenerateUserWalletKeyAsync(),
-                TwoFactorEnabled = true
+                TwoFactorEnabled = true,
+                LimitKeysToCreate = int.Parse(_configuration["LimitKeysToCreate"])
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -187,6 +191,21 @@ namespace ProxyProject_Backend.Controllers
                     Status = "Error", 
                     Message = "User creation failed! Please check user details and try again.", Data = result.Errors 
                 });
+            }
+
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            }
+
+            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            }
+
+            if (await _roleManager.RoleExistsAsync(UserRoles.User))
+            {
+                await _userManager.AddToRoleAsync(user, UserRoles.User);
             }
 
             return Ok(new ResponseModel 

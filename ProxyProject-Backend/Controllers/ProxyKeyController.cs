@@ -43,50 +43,64 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null)
             {
+                
                 var proxyKeyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(model.ProxyKeyPlanId);
-                var totalOrderedAmount = model.NoOfKeys * model.NoOfDates * proxyKeyPlan.Price;
 
-                if(totalOrderedAmount >= user.Balance)
+                if(proxyKeyPlan != null)
                 {
-                    // Perform orders
-                    var listOrderedKey = new List<ProxyKeysEntity>();
+                    var totalOrderedAmount = model.NoOfKeys * model.NoOfDates * proxyKeyPlan.Price;
 
-                    for (int i = 0; i < model.NoOfKeys; i++)
+                    if (totalOrderedAmount <= user.Balance)
                     {
-                        listOrderedKey.Add(new ProxyKeysEntity
+                        var noOfCreatedKeys = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id);
+
+                        if ((noOfCreatedKeys + model.NoOfKeys) > user.LimitKeysToCreate)
                         {
-                            Key = await _proxyKeyService.GenerateProxyKeyAsync(),
-                            ProxyKeyPlanId = proxyKeyPlan.Id,
-                            ExpireDate = DateTime.UtcNow.AddDays(model.NoOfDates),
-                            UserId = user.Id
-                        });
+                            // Perform orders
+                            var listOrderedKey = new List<ProxyKeysEntity>();
+
+                            for (int i = 0; i < model.NoOfKeys; i++)
+                            {
+                                listOrderedKey.Add(new ProxyKeysEntity
+                                {
+                                    Key = await _proxyKeyService.GenerateProxyKeyAsync(),
+                                    ProxyKeyPlanId = proxyKeyPlan.Id,
+                                    ExpireDate = DateTime.UtcNow.AddDays(model.NoOfDates),
+                                    UserId = user.Id
+                                });
+                            }
+
+                            await _unitOfWork.ProxyKeysRepository.InsertListAsync(listOrderedKey);
+
+                            // Update user balance
+                            user.Balance -= totalOrderedAmount;
+                            _unitOfWork.UserRepository.Update(user);
+
+                            // Update wallet history
+                            await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                            {
+                                UserId = user.Id,
+                                WalletKey = user.WalletKey,
+                                Value = -totalOrderedAmount,
+                                CreatedDate = DateTime.UtcNow,
+                                Note = $"Mua {model.NoOfKeys} keys - {model.NoOfDates} ngay. {proxyKeyPlan.Name}"
+                            });
+
+                            await _unitOfWork.SaveChangesAsync();
+
+                            return Ok(new ResponseModel
+                            {
+                                Status = "Success",
+                                Data = listOrderedKey.Select(x => x.Key).ToList()
+                            });
+                        }
+
+                        return BadRequest("Exceed limit keys to created");
                     }
-
-                    await _unitOfWork.ProxyKeysRepository.InsertListAsync(listOrderedKey);
-
-                    // Update user balance
-                    user.Balance -= totalOrderedAmount;
-                    _unitOfWork.UserRepository.Update(user);
-
-                    // Update wallet history
-                    await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
-                    {
-                        UserId = user.Id,
-                        WalletKey = user.WalletKey,
-                        Value = -totalOrderedAmount,
-                        CreatedDate = DateTime.UtcNow,
-                        Note = $"Mua {model.NoOfKeys} keys - {model.NoOfDates} ngay. {proxyKeyPlan.Name}"
-                    });
-
-                    await _unitOfWork.SaveChangesAsync();
-
-                    return Ok(new ResponseModel
-                    {
-                        Status = "Success",
-                        Data = listOrderedKey.Select(x => x.Key).ToList()
-                    });
+                    return BadRequest("Balance is not enough");
                 }
-                return BadRequest("Balance is not enough");
+
+                return BadRequest("Proxy Plan not found");
             }
 
             return BadRequest("Empty User");

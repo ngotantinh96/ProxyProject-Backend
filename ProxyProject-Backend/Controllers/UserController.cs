@@ -43,7 +43,9 @@ namespace ProxyProject_Backend.Controllers
                         APIKey = user.APIKey,
                         WalletKey = user.WalletKey,
                         Balance = user.Balance,
-                        TotalDeposited = user.TotalDeposited
+                        TotalDeposited = user.TotalDeposited,
+                        LimitKeysToCreate = user.LimitKeysToCreate,
+                        NoOfCreatedKeys = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id)
                     }
                 });
             }
