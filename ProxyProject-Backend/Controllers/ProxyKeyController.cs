@@ -6,6 +6,7 @@ using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
 using ProxyProject_Backend.Services.Interface;
+using System.Linq.Expressions;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -167,7 +168,7 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null)
             {
-                var proxyKeys = await _unitOfWork.ProxyKeysRepository.GetAsync(x => x.UserId == user.Id && model.Keys.Contains(x.Key));
+                var proxyKeys = await _unitOfWork.ProxyKeysRepository.GetAsync(x => x.UserId == user.Id && model.Ids.Contains(x.Id));
 
                 if (proxyKeys.Any())
                 {
@@ -231,10 +232,20 @@ namespace ProxyProject_Backend.Controllers
         {
             var user = await GetCurrentUser();
 
+            Expression<Func<ProxyKeysEntity, bool>> filterKeyWord = null;
+            if (!string.IsNullOrWhiteSpace(model.Keyword))
+            {
+                filterKeyWord = (x) => (x.Key.Contains(model.Keyword)) && x.UserId == user.Id;
+            }
+            else
+            {
+                filterKeyWord = (x) => x.UserId == user.Id;
+            }
             if (user != null)
             {
                 var purchasedProxyKeys = await _unitOfWork.ProxyKeysRepository
-                    .GetAsync(x => x.UserId == user.Id, x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan", model.PageIndex, model.PageSize);
+                    .GetAsync(filterKeyWord, 
+                    x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan", model.PageIndex, model.PageSize);
 
                 return Ok(new ResponseModel
                 {
@@ -245,7 +256,7 @@ namespace ProxyProject_Backend.Controllers
                         ProxyKeyPlan = x.ProxyKeyPlan?.Name,
                         ProxyKey = x.Key,
                         ExpireDate = x.ExpireDate,
-                        Status = x.ExpireDate < DateTime.UtcNow ? EnumStatusKey.WORKING : EnumStatusKey.EXPIRED,
+                        Status = x.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING : EnumStatusKey.EXPIRED,
                         Note = x.Note
                     }),
                     Total = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id)
