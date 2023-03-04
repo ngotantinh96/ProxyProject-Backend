@@ -4,7 +4,7 @@ namespace ProxyProject_Backend.DAL.Interface
 {
     public interface IGenericRepository<TEntity> where TEntity : class
     {
-        Task<IEnumerable<TEntity>> GetAsync(
+        Task<List<TEntity>> GetAsync(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "", int page = 0, int take = 0);
@@ -14,7 +14,7 @@ namespace ProxyProject_Backend.DAL.Interface
         void Delete(object id);
         void Delete(TEntity entityToDelete);
         void Update(TEntity entityToUpdate);
-        Task<int> CountByFilterAsync(Expression<Func<TEntity, bool>> filter);
+        Task<int> CountByFilterAsync(Expression<Func<TEntity, bool>> filter = null);
         Task InsertListAsync(List<TEntity> entities);
         void DeleteList(List<object> ids);
         void DeleteList(List<TEntity> entitiesToDelete);

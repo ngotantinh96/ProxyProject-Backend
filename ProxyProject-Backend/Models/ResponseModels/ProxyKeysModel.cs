@@ -1,6 +1,6 @@
 ﻿namespace ProxyProject_Backend.Models.Response
 {
-    public class ProxyKeysModel
+    public class ProxyKeyModel
     {
         public Guid Id { get; set; }
         public string ProxyKeyPlan { get; set; }

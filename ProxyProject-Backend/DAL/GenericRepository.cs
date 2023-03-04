@@ -15,7 +15,7 @@ namespace ProxyProject_Backend.DAL
             _dbSet = context.Set<TEntity>();
         }
 
-        public virtual async Task<IEnumerable<TEntity>> GetAsync(
+        public virtual async Task<List<TEntity>> GetAsync(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "", int page = 0, int take = 0)
@@ -59,7 +59,7 @@ namespace ProxyProject_Backend.DAL
 
         public virtual async Task<TEntity> GetByFilterAsync(Expression<Func<TEntity, bool>> filter)
         {
-            return await _dbSet.FindAsync(filter);
+            return await _dbSet.FirstOrDefaultAsync(filter);
         }
 
         public virtual async Task<TEntity> GetByIDAsync(object id)
@@ -93,9 +93,9 @@ namespace ProxyProject_Backend.DAL
             _context.Entry(entityToUpdate).State = EntityState.Modified;
         }
 
-        public async Task<int> CountByFilterAsync(Expression<Func<TEntity, bool>> filter)
+        public async Task<int> CountByFilterAsync(Expression<Func<TEntity, bool>> filter = null)
         {
-            return await _dbSet.CountAsync(filter);
+            return filter != null ? await _dbSet.CountAsync(filter) : await _dbSet.CountAsync();
         }
 
         public async Task InsertListAsync(List<TEntity> entities)

@@ -6,7 +6,6 @@ namespace ProxyProject_Backend.DAL.Entities
     {
         public string APIKey { get; set; }
         public string WalletKey { get; set; }
-        public string DepositMemo { get; set; }
         public int LimitKeysToCreate { get; set; }
         public decimal Balance { get; set; }
         public decimal TotalDeposited { get; set; }
