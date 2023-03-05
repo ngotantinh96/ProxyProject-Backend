@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace ProxyProject_Backend.DAL.Entities
+namespace ProxyProject_Backend.DAL.Entities.Interface
 {
     public class CoreEntity
     {

@@ -35,6 +35,7 @@ namespace ProxyProject_Backend.Controllers
                 Data = await _unitOfWork.ProxyKeyPlansRepository.GetAsync()
             });
         }
+
         [HttpPost]
         [Route("OrderProxyKeys")]
         public async Task<IActionResult> OrderProxyKeys(OrderProxyKeysModel model)
@@ -43,7 +44,6 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null)
             {
-
                 var proxyKeyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(model.ProxyKeyPlanId);
 
                 if (proxyKeyPlan != null)
@@ -166,7 +166,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpDelete]
         [Route("DeleteProxyKeys")]
-        public async Task<IActionResult> DeleteProxyKeys(ExtendProxyKeysModel model)
+        public async Task<IActionResult> DeleteProxyKeys(DeleteProxyKeysModel model)
         {
             var user = await GetCurrentUser();
 
@@ -258,6 +258,8 @@ namespace ProxyProject_Backend.Controllers
                     {
                         Id = x.Id,
                         ProxyKeyPlan = x.ProxyKeyPlan?.Name,
+                        PlanPrice = (decimal)(x.ProxyKeyPlan?.Price),
+                        PlanPriceUnit = x.ProxyKeyPlan?.PriceUnit,
                         ProxyKey = x.Key,
                         ExpireDate = x.ExpireDate,
                         Status = x.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING : EnumStatusKey.EXPIRED,

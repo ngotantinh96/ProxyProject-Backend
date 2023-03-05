@@ -67,9 +67,10 @@ namespace ProxyProject_Backend.DAL
             return await _dbSet.FindAsync(id);
         }
 
-        public virtual async Task InsertAsync(TEntity entity)
+        public virtual async Task<TEntity> InsertAsync(TEntity entity)
         {
-            await _dbSet.AddAsync(entity);
+            var trackingEntity = await _dbSet.AddAsync(entity);
+            return trackingEntity.Entity;
         }
 
         public virtual void Delete(object id)

@@ -14,6 +14,8 @@ namespace ProxyProject_Backend.DAL
         private GenericRepository<ProxyKeyPlansEntity> _proxyKeyPlansRepository;
         private GenericRepository<ProxyKeysEntity> _proxyKeysRepository;
         private GenericRepository<WalletHistoryEntity> _walletHistoryRepository;
+        private GenericRepository<BankAccountEntity> _bankAccountRepository;
+        private GenericRepository<NotificationEntity> _notificationRepository;
 
         public GenericRepository<UserEntity> UserRepository
         {
@@ -60,6 +62,30 @@ namespace ProxyProject_Backend.DAL
                     _walletHistoryRepository = new GenericRepository<WalletHistoryEntity>(_context);
                 }
                 return _walletHistoryRepository;
+            }
+        }
+
+        public GenericRepository<BankAccountEntity> BankAccountRepository
+        {
+            get
+            {
+                if (_bankAccountRepository == null)
+                {
+                    _bankAccountRepository = new GenericRepository<BankAccountEntity>(_context);
+                }
+                return _bankAccountRepository;
+            }
+        }
+
+        public GenericRepository<NotificationEntity> NotificationRepository
+        {
+            get
+            {
+                if (_notificationRepository == null)
+                {
+                    _notificationRepository = new GenericRepository<NotificationEntity>(_context);
+                }
+                return _notificationRepository;
             }
         }
 

@@ -4,7 +4,6 @@ using Microsoft.IdentityModel.Tokens;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
-using ProxyProject_Backend.Services;
 using ProxyProject_Backend.Services.Interface;
 using ProxyProject_Backend.Utils;
 using System.IdentityModel.Tokens.Jwt;

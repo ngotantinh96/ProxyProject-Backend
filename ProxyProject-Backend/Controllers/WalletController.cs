@@ -5,8 +5,6 @@ using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
-using ProxyProject_Backend.Services.Interface;
-
 namespace ProxyProject_Backend.Controllers
 {
     [Route("api/wallet")]
@@ -14,14 +12,11 @@ namespace ProxyProject_Backend.Controllers
     [Authorize]
     public class WalletController : ApiBaseController
     {
-        private readonly IProxyKeyService _proxyKeyService;
         public WalletController(
             ApplicationDbContext context,
-            UserManager<UserEntity> userManager,
-            IProxyKeyService proxyKeyService
+            UserManager<UserEntity> userManager
             ) : base(context, userManager)
         {
-            _proxyKeyService = proxyKeyService;
         }
 
         [HttpGet]
@@ -40,6 +35,7 @@ namespace ProxyProject_Backend.Controllers
                     Status = "Success",
                     Data = walletHistory.Select(x => new WalletHistoryModel
                     {
+                        Id = x.Id,
                         CreatedDate = x.CreatedDate,
                         Value = x.Value,
                         Note = x.Note
@@ -74,6 +70,7 @@ namespace ProxyProject_Backend.Controllers
                         TotalDeposited = user.TotalDeposited,
                         History = walletHistory.Select(x => new WalletHistoryModel
                         {
+                            Id = x.Id,
                             CreatedDate = x.CreatedDate,
                             Value = x.Value,
                             Note = x.Note

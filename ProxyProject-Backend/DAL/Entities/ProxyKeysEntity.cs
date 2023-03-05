@@ -1,4 +1,6 @@
-﻿namespace ProxyProject_Backend.DAL.Entities
+﻿using ProxyProject_Backend.DAL.Entities.Interface;
+
+namespace ProxyProject_Backend.DAL.Entities
 {
     public class ProxyKeysEntity : CoreEntity
     {

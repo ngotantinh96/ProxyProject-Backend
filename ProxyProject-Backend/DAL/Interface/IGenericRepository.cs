@@ -10,7 +10,7 @@ namespace ProxyProject_Backend.DAL.Interface
             string includeProperties = "", int page = 0, int take = 0);
         Task<TEntity> GetByFilterAsync(Expression<Func<TEntity, bool>> filter);
         Task<TEntity> GetByIDAsync(object id);
-        Task InsertAsync(TEntity entity);
+        Task<TEntity> InsertAsync(TEntity entity);
         void Delete(object id);
         void Delete(TEntity entityToDelete);
         void Update(TEntity entityToUpdate);
