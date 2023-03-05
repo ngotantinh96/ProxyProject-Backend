@@ -168,7 +168,7 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null)
             {
-                var proxyKeys = await _unitOfWork.ProxyKeysRepository.GetAsync(x => x.UserId == user.Id && model.Ids.Contains(x.Id));
+                var proxyKeys = await _unitOfWork.ProxyKeysRepository.GetAsync(x => x.UserId == user.Id && model.Keys.Contains(x.Key));
 
                 if (proxyKeys.Any())
                 {
