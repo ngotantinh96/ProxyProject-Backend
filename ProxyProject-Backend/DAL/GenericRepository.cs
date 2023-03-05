@@ -37,7 +37,7 @@ namespace ProxyProject_Backend.DAL
             {
                 if(take != 0)
                 {
-                    return await orderBy(query).Skip(page).Take(take).ToListAsync();
+                    return await orderBy(query).Skip(page * take).Take(take).ToListAsync();
                 }
                 else
                 {

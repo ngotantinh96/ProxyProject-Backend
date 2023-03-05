@@ -61,6 +61,10 @@ namespace ProxyProject_Backend.Controllers
 
                             for (int i = 0; i < model.NoOfKeys; i++)
                             {
+                                if (model.NoOfKeys - 2 == i)
+                                {
+                                    var a = 1;
+                                }
                                 listOrderedKey.Add(new ProxyKeysEntity
                                 {
                                     Key = await _proxyKeyService.GenerateProxyKeyAsync(),
