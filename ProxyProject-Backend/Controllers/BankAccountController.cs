@@ -6,6 +6,7 @@ using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
 using ProxyProject_Backend.Utils;
+using System.Linq.Expressions;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -28,11 +29,16 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpGet]
-        [Route("GetBankAccounts")]
+        [Route("")]
         public async Task<IActionResult> GetBankAccounts([FromQuery] GetListPagingModel model)
         {
+            Expression<Func<BankAccountEntity, bool>> filter = null;
+            if (!string.IsNullOrWhiteSpace(model.Keyword))
+            {
+                filter = (x) => x.AccountName == model.Keyword;
+            }
             var backAccounts = await _unitOfWork.BankAccountRepository
-                     .GetAsync(null, null, "", model.PageIndex, model.PageSize);
+                     .GetAsync(filter, null, "", model.PageIndex, model.PageSize);
 
             return Ok(new ResponseModel
             {
@@ -52,7 +58,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpPost]
         [Authorize(Roles = UserRoles.Admin)]
-        [Route("AddBankAccount")]
+        [Route("")]
         public async Task<IActionResult> AddBankAccount([FromForm] AddBankAccountModel model)
         {
             if (model.BankLogo != null && model.BankLogo.Length > 0)
@@ -96,9 +102,9 @@ namespace ProxyProject_Backend.Controllers
             return BadRequest("File is empty");
         }
 
-        [HttpPost]
+        [HttpPatch]
         [Authorize(Roles = UserRoles.Admin)]
-        [Route("UpdateBankAccount")]
+        [Route("")]
         public async Task<IActionResult> UpdateBankAccount([FromForm] UpdateBankAccountModel model)
         {
             var bankAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
@@ -173,24 +179,17 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpDelete]
         [Authorize(Roles = UserRoles.Admin)]
-        [Route("DeleteBankAccount")]
+        [Route("")]
         public async Task<IActionResult> DeleteBankAccount(DeleteBankAccountModel model)
         {
-            var bankAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
-
-            if (bankAccount != null)
+            //var bankAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
+            _unitOfWork.BankAccountRepository.DeleteList(model.Ids);
+            await _unitOfWork.SaveChangesAsync();
+            return Ok(new ResponseModel
             {
-                _unitOfWork.BankAccountRepository.Delete(bankAccount);
-                await _unitOfWork.SaveChangesAsync();
-
-                return Ok(new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Delete bank account successfully!"
-                });
-            }
-
-            return BadRequest("Bank account not found");
+                Status = "Success",
+                Message = "Delete bank account successfully!"
+            });
         }
 
         #region private functions

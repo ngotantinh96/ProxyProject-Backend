@@ -4,7 +4,7 @@ namespace ProxyProject_Backend.Models.RequestModels
 {
     public class DeleteBankAccountModel
     {
-        [Required(ErrorMessage = "Bank Id is required")]
-        public Guid Id { get; set; }
+        [Required(ErrorMessage = "Bank Ids is required")]
+        public List<Guid> Ids { get; set; }
     }
 }

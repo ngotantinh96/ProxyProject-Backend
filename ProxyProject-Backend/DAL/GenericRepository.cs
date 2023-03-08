@@ -104,13 +104,13 @@ namespace ProxyProject_Backend.DAL
             await _dbSet.AddRangeAsync(entities);
         }
 
-        public void DeleteList(List<object> ids)
+        public void DeleteList(List<Guid> ids)
         {
             var entitiesToDelete = new List<TEntity>();
 
             ids.ForEach(id =>
             {
-                entitiesToDelete.Add(_dbSet.Find(ids));
+                entitiesToDelete.Add(_dbSet.Find(id));
             });
 
             DeleteList(entitiesToDelete);

@@ -16,7 +16,7 @@ namespace ProxyProject_Backend.DAL.Interface
         void Update(TEntity entityToUpdate);
         Task<int> CountByFilterAsync(Expression<Func<TEntity, bool>> filter = null);
         Task InsertListAsync(List<TEntity> entities);
-        void DeleteList(List<object> ids);
+        void DeleteList(List<Guid> ids);
         void DeleteList(List<TEntity> entitiesToDelete);
         void UpdateList(List<TEntity> entitiesToUpdate);
     }
