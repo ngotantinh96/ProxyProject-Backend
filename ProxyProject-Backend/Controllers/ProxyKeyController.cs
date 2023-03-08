@@ -248,7 +248,7 @@ namespace ProxyProject_Backend.Controllers
             if (user != null)
             {
                 var purchasedProxyKeys = await _unitOfWork.ProxyKeysRepository
-                    .GetAsync(filterKeyWord, 
+                    .GetAsync(filterKeyWord,
                     x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan", model.PageIndex, model.PageSize);
 
                 return Ok(new ResponseModel
@@ -266,10 +266,37 @@ namespace ProxyProject_Backend.Controllers
                         Note = x.Note
                     }),
                     Total = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id)
-            });
+                });
             }
 
             return BadRequest("Empty User");
+        }
+
+        [HttpPost]
+        [Route("GetProxyPlansByKeys")]
+        public async Task<IActionResult> GetPurchasedProxyKeys([FromBody] List<string> keys)
+        {
+            var user = await GetCurrentUser();
+
+            var proxyKeys = await _unitOfWork.ProxyKeysRepository
+                    .GetAsync(x => keys.Contains(x.Key),
+                    x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan");
+
+            var response = proxyKeys.Select(x => new
+            {
+                ProxyKey = x.Key,
+                ProxyKeyPlanName = x.ProxyKeyPlan.Name,
+                x.ProxyKeyPlan.Price,
+                x.ProxyKeyPlan.PriceUnit,
+                x.ExpireDate
+
+            }).ToList();
+
+            return Ok(new ResponseModel()
+            {
+                Status = "Success",
+                Data = response,
+            });
         }
     }
 }
