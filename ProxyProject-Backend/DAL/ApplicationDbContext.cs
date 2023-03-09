@@ -1,17 +1,20 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using ProxyProject_Backend.DAL.Entities;
-using System.Reflection.Emit;
+using ProxyProject_Backend.Utils;
 
 namespace ProxyProject_Backend.DAL
 {
     public class ApplicationDbContext : IdentityDbContext<UserEntity>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        private readonly IConfiguration _configuration;
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            IConfiguration configuration
+            ) : base(options)
         {
-
+            _configuration = configuration;
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -34,6 +37,7 @@ namespace ProxyProject_Backend.DAL
                .WithOne(x => x.User)
                .HasForeignKey(x => x.UserId);
 
+            // Seed data config
             builder.Entity<IdentityRole>().HasData(new List<IdentityRole>
             {
                 new IdentityRole
@@ -50,7 +54,28 @@ namespace ProxyProject_Backend.DAL
                 }
             });
 
-            // Seed data config
+
+            var hasher = new PasswordHasher<UserEntity>();
+            builder.Entity<UserEntity>().HasData(new UserEntity
+            {
+                Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
+                Email = _configuration["AdminAccount:Email"],
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = _configuration["AdminAccount:UserName"],
+                APIKey = StringUtils.GenerateSecureKey(),
+                WalletKey = StringUtils.GenerateSecureKey(),
+                TwoFactorEnabled = true,
+                LimitKeysToCreate = int.Parse(_configuration["AdminAccount:LimitKeysToCreate"]),
+                PasswordHash = hasher.HashPassword(null, _configuration["AdminAccount:Password"]),
+                
+            });
+
+            builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
+            {
+                UserId = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
+                RoleId = "fb2ec114-eb3c-499d-ab9d-ab8cb579c329"
+            });
+
             builder.Entity<ProxyKeyPlansEntity>().HasData(new ProxyKeyPlansEntity 
             { 
                 Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),

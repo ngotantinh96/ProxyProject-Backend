@@ -4,7 +4,7 @@ namespace ProxyProject_Backend.DAL
 {
     public class UnitOfWork : IDisposable
     {
-        private ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;

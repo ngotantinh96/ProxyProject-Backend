@@ -133,7 +133,7 @@ namespace ProxyProject_Backend
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
-               Path.Combine(builder.Environment.WebRootPath, "BankLogo")),
+               Path.Combine(builder.Environment.ContentRootPath, "BankLogo")),
                 RequestPath = "/BankLogo"
             });
 
