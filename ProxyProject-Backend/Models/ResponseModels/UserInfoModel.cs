@@ -1,6 +1,4 @@
-﻿using ProxyProject_Backend.DAL.Entities;
-
-namespace ProxyProject_Backend.Models.Response
+﻿namespace ProxyProject_Backend.Models.Response
 {
     public class UserInfoModel
     {

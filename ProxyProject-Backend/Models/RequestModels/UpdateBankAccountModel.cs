@@ -2,10 +2,8 @@
 
 namespace ProxyProject_Backend.Models.RequestModels
 {
-    public class UpdateBankAccountModel
+    public class UpdateBankAccountModel : RequestBankAccountModel
     {
-        [Required(ErrorMessage = "Bank account id is required")]
-        public Guid Id { get; set; }
         [Required(ErrorMessage = "Bank name is required")]
         public string BankName { get; set; }
         [Required(ErrorMessage = "Bank account name is required")]

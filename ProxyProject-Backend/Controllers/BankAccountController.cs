@@ -33,10 +33,12 @@ namespace ProxyProject_Backend.Controllers
         public async Task<IActionResult> GetBankAccounts([FromQuery] GetListPagingModel model)
         {
             Expression<Func<BankAccountEntity, bool>> filter = null;
+
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             {
                 filter = (x) => x.AccountName == model.Keyword;
             }
+
             var backAccounts = await _unitOfWork.BankAccountRepository
                      .GetAsync(filter, null, "", model.PageIndex, model.PageSize);
 
@@ -56,8 +58,35 @@ namespace ProxyProject_Backend.Controllers
             });
         }
 
+        [HttpGet]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        [Route("GetBankAccount")]
+        public async Task<IActionResult> GetBankAccount(RequestBankAccountModel model)
+        {
+            var backAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
+
+            if (backAccount != null)
+            {
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = new BankAccountModel
+                    {
+                        Id = backAccount.Id,
+                        BankName = backAccount.BankName,
+                        BankLogo = backAccount.BankLogo,
+                        AccountName = backAccount.AccountName,
+                        AccountNumber = backAccount.AccountNumber,
+                        IsMaintainance = backAccount.IsMaintainance
+                    }
+                });
+            }
+
+            return BadRequest("Bank account not found");
+        }
+
         [HttpPost]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("")]
         public async Task<IActionResult> AddBankAccount([FromForm] AddBankAccountModel model)
         {
@@ -103,7 +132,7 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpPatch]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("")]
         public async Task<IActionResult> UpdateBankAccount([FromForm] UpdateBankAccountModel model)
         {
@@ -147,7 +176,7 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("ToggleBankAccountMaintainance")]
         public async Task<IActionResult> ToggleBankAccountMaintainance(ToggleBankAccountMaintainanceModel model)
         {
@@ -178,7 +207,7 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("")]
         public async Task<IActionResult> DeleteBankAccount(DeleteBankAccountModel model)
         {
