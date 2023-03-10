@@ -124,6 +124,7 @@ namespace ProxyProject_Backend.Controllers
                 bankAccount.BankName = model.BankName;
                 bankAccount.AccountName = model.AccountName;
                 bankAccount.AccountNumber = model.AccountNumber;
+                bankAccount.IsMaintainance = model.IsMaintainance;
 
                 _unitOfWork.BankAccountRepository.Update(bankAccount);
                 await _unitOfWork.SaveChangesAsync();

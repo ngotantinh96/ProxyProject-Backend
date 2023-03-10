@@ -13,5 +13,8 @@ namespace ProxyProject_Backend.Models.RequestModels
         [Required(ErrorMessage = "Bank account number is required")]
         public string AccountNumber { get; set; }
         public IFormFile BankLogo { get; set; }
+
+        [Required(ErrorMessage = "IsMaintainance is required")]
+        public bool IsMaintainance { get; set; }
     }
 }
