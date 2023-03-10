@@ -135,7 +135,7 @@ namespace ProxyProject_Backend.Controllers
             }
 
             var users = await _unitOfWork.UserRepository
-                     .GetAsync(filter, x => x.OrderByDescending(p => p.UserName), "", model.PageIndex, model.PageSize);
+                     .GetAsync(filter, x => x.OrderBy(p => p.UserName), "", model.PageIndex, model.PageSize);
 
             return Ok(new ResponseModel
             {

@@ -6,7 +6,6 @@ using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
 using System.Linq.Expressions;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace ProxyProject_Backend.Controllers
 {
