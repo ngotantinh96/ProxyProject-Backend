@@ -29,10 +29,18 @@ namespace ProxyProject_Backend.Controllers
         [Route("GetProxyKeyPlans")]
         public async Task<IActionResult> GetProxyKeyPlans()
         {
+            var proxyPlans = await _unitOfWork.ProxyKeyPlansRepository.GetAsync();
             return Ok(new ResponseModel
             {
                 Status = "Success",
-                Data = await _unitOfWork.ProxyKeyPlansRepository.GetAsync()
+                Data = proxyPlans.Select(x => new ProxyPlanModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Price = x.Price,
+                    PriceUnit = x.PriceUnit,
+                    Description = x.Description
+                })
             });
         }
 

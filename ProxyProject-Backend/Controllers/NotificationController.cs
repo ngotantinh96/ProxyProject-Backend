@@ -5,6 +5,7 @@ using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
+using System.Linq.Expressions;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -24,8 +25,15 @@ namespace ProxyProject_Backend.Controllers
         [Route("GetNotifications")]
         public async Task<IActionResult> GetNotifications([FromQuery] GetListPagingModel model)
         {
+            Expression<Func<NotificationEntity, bool>> filter = null;
+
+            if (!string.IsNullOrWhiteSpace(model.Keyword))
+            {
+                filter = (x) => x.Message == model.Keyword;
+            }
+
             var notifications = await _unitOfWork.NotificationRepository
-                     .GetAsync(null, x => x.OrderByDescending(p => p.CreatedDate), "", model.PageIndex, model.PageSize);
+                     .GetAsync(filter, x => x.OrderByDescending(p => p.CreatedDate), "", model.PageIndex, model.PageSize);
 
             return Ok(new ResponseModel
             {
@@ -41,8 +49,33 @@ namespace ProxyProject_Backend.Controllers
             });
         }
 
+        [HttpGet]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        [Route("GetNotification")]
+        public async Task<IActionResult> GetNotification(RequestNotificationModel model)
+        {
+            var notification = await _unitOfWork.NotificationRepository.GetByIDAsync(model.Id);
+
+            if (notification != null)
+            {
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = new NotificationModel
+                    {
+                        Id = notification.Id,
+                        CreatedDate = notification.CreatedDate,
+                        Message = notification.Message,
+                        NotificationType = notification.NotificationType
+                    }
+                });
+            }
+
+            return BadRequest("Notification not found");
+        }
+
         [HttpPost]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("AddNotification")]
         public async Task<IActionResult> AddNotification(AddNotificationModel model)
         {
@@ -74,8 +107,8 @@ namespace ProxyProject_Backend.Controllers
 
         }
 
-        [HttpPost]
-        [Authorize(Roles = UserRoles.Admin)]
+        [HttpPatch]
+        [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("UpdateNotification")]
         public async Task<IActionResult> UpdateNotification(UpdateNotificationModel model)
         {
@@ -106,9 +139,9 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("DeleteNotification")]
-        public async Task<IActionResult> DeleteNotification(DeleteNotificationModel model)
+        public async Task<IActionResult> DeleteNotification(RequestNotificationModel model)
         {
             var notification = await _unitOfWork.NotificationRepository.GetByIDAsync(model.Id);
 

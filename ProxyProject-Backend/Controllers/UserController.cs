@@ -6,6 +6,7 @@ using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
 using ProxyProject_Backend.Services.Interface;
+using System.Linq.Expressions;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -14,14 +15,20 @@ namespace ProxyProject_Backend.Controllers
     [Authorize]
     public class UserController : ApiBaseController
     {
+        private readonly IConfiguration _configuration;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IUserService _userService;
 
         public UserController(
             ApplicationDbContext context,
             UserManager<UserEntity> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IConfiguration configuration,
             IUserService userService
             ) : base(context, userManager)
         {
+            _configuration = configuration;
+            _roleManager = roleManager;
             _userService = userService;
         }
 
@@ -114,6 +121,183 @@ namespace ProxyProject_Backend.Controllers
             }
 
             return BadRequest("Empty User");
+        }
+
+        [HttpGet]
+        [Route("GetUsers")]
+        public async Task<IActionResult> GetUsers([FromQuery] GetListPagingModel model)
+        {
+            Expression<Func<UserEntity, bool>> filter = null;
+
+            if (!string.IsNullOrWhiteSpace(model.Keyword))
+            {
+                filter = (x) => x.Email == model.Keyword || x.UserName == model.Keyword;
+            }
+
+            var users = await _unitOfWork.UserRepository
+                     .GetAsync(filter, x => x.OrderBy(p => p.UserName), "", model.PageIndex, model.PageSize);
+
+            return Ok(new ResponseModel
+            {
+                Status = "Success",
+                Data = users.Select(async user => new UserModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    APIKey = user.APIKey,
+                    WalletKey = user.WalletKey,
+                    Balance = user.Balance,
+                    TotalDeposited = user.TotalDeposited,
+                    LimitKeysToCreate = user.LimitKeysToCreate,
+                    NoOfCreatedKeys = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id)
+                }),
+                Total = await _unitOfWork.UserRepository.CountByFilterAsync()
+            });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        [Route("GetUser")]
+        public async Task<IActionResult> GetUser(RequestUserModel model)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIDAsync(model.Id);
+
+            if (user != null)
+            {
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = new UserModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        APIKey = user.APIKey,
+                        WalletKey = user.WalletKey,
+                        Balance = user.Balance,
+                        TotalDeposited = user.TotalDeposited,
+                        LimitKeysToCreate = user.LimitKeysToCreate,
+                        NoOfCreatedKeys = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(p => p.UserId == user.Id)
+                    }
+                });
+            }
+
+            return BadRequest("User not found");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        [Route("AddUser")]
+        public async Task<IActionResult> AddUser(AddUserModel model)
+        {
+            var user = new UserEntity()
+            {
+                Email = model.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = model.UserName,
+                APIKey = await _userService.GenerateUserAPIKeyAsync(),
+                WalletKey = await _userService.GenerateUserWalletKeyAsync(),
+                TwoFactorEnabled = true,
+                LimitKeysToCreate = model.LimitKeysToCreate > 0 ? model.LimitKeysToCreate : int.Parse(_configuration["LimitKeysToCreate"])
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel
+                {
+                    Status = "Error",
+                    Message = "User creation failed! Please check user details and try again.",
+                    Data = result.Errors
+                });
+            }
+
+            if (await _roleManager.RoleExistsAsync(UserRolesConstant.User))
+            {
+                await _userManager.AddToRoleAsync(user, UserRolesConstant.User);
+            }
+
+            return Ok(new ResponseModel
+            {
+                Status = "Success",
+                Data = new UserModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    APIKey = user.APIKey,
+                    WalletKey = user.WalletKey,
+                    Balance = user.Balance,
+                    TotalDeposited = user.TotalDeposited,
+                    LimitKeysToCreate = user.LimitKeysToCreate,
+                    NoOfCreatedKeys = 0
+                }
+            });
+        }
+
+        [HttpPatch]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        [Route("UpdateUser")]
+        public async Task<IActionResult> UpdateUser(UpdateUserModel model)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIDAsync(model.Id);
+
+            if (user != null)
+            {
+                user.UserName = model.UserName;
+                user.Email = model.Email;
+
+                if(model.LimitKeysToCreate > 0)
+                {
+                    user.LimitKeysToCreate = model.LimitKeysToCreate;
+                }
+
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.SaveChangesAsync();
+
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = new UserModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        APIKey = user.APIKey,
+                        WalletKey = user.WalletKey,
+                        Balance = user.Balance,
+                        TotalDeposited = user.TotalDeposited,
+                        LimitKeysToCreate = user.LimitKeysToCreate,
+                        NoOfCreatedKeys = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(p => p.UserId == user.Id)
+                    }
+                });
+            }
+
+            return BadRequest("User not found");
+        }
+
+        [HttpDelete]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        [Route("DeleteUser")]
+        public async Task<IActionResult> DeleteUser(RequestUserModel model)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIDAsync(model.Id);
+
+            if (user != null)
+            {
+                _unitOfWork.UserRepository.Delete(user);
+                await _unitOfWork.SaveChangesAsync();
+
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Message = "Delete user successfully!"
+                });
+            }
+
+            return BadRequest("User not found");
         }
     }
 }

@@ -14,7 +14,7 @@ namespace ProxyProject_Backend.DAL.Entities
         public virtual List<WalletHistoryEntity> WalletHistories { get; set; }
     }
 
-    public static class UserRoles
+    public static class UserRolesConstant
     {
         public const string Admin = "Admin";
         public const string User = "User";
