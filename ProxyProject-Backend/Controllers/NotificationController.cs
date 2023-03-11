@@ -141,23 +141,18 @@ namespace ProxyProject_Backend.Controllers
         [HttpDelete]
         [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("DeleteNotification")]
-        public async Task<IActionResult> DeleteNotification(RequestNotificationModel model)
+        public async Task<IActionResult> DeleteNotification(DeleteNotificationModel model)
         {
-            var notification = await _unitOfWork.NotificationRepository.GetByIDAsync(model.Id);
+            //var notification = await _unitOfWork.NotificationRepository.GetByIDAsync(model.Id);
 
-            if (notification != null)
+            _unitOfWork.NotificationRepository.DeleteList(model.Ids);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Ok(new ResponseModel
             {
-                _unitOfWork.NotificationRepository.Delete(notification);
-                await _unitOfWork.SaveChangesAsync();
-
-                return Ok(new ResponseModel
-                {
-                    Status = "Success",
-                    Message = "Delete notification successfully!"
-                });
-            }
-
-            return BadRequest("Notification not found");
+                Status = "Success",
+                Message = "Delete notification successfully!"
+            });
         }
     }
 }

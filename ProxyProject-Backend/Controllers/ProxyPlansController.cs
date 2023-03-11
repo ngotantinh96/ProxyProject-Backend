@@ -6,7 +6,6 @@ using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
 using System.Linq.Expressions;
-using System.Xml.Linq;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -43,6 +42,7 @@ namespace ProxyProject_Backend.Controllers
                 {
                     Id = x.Id,
                     Name = x.Name,
+                    Code = x.Code,
                     Price = x.Price,
                     PriceUnit = x.PriceUnit,
                     Description = x.Description
@@ -67,6 +67,7 @@ namespace ProxyProject_Backend.Controllers
                     {
                         Id = proxyPlan.Id,
                         Name = proxyPlan.Name,
+                        Code = proxyPlan.Code,
                         Price = proxyPlan.Price,
                         PriceUnit = proxyPlan.PriceUnit,
                         Description = proxyPlan.Description
@@ -85,6 +86,7 @@ namespace ProxyProject_Backend.Controllers
             var proxyPlan = await _unitOfWork.ProxyKeyPlansRepository.InsertAsync(new ProxyKeyPlansEntity
             {
                 Name = model.Name,
+                Code = model.Code,
                 Price = model.Price,
                 PriceUnit = model.PriceUnit,
                 Description = model.Description
@@ -101,6 +103,7 @@ namespace ProxyProject_Backend.Controllers
                     {
                         Id = proxyPlan.Id,
                         Name = proxyPlan.Name,
+                        Code = proxyPlan.Code,
                         Price = proxyPlan.Price,
                         PriceUnit = proxyPlan.PriceUnit,
                         Description = proxyPlan.Description
@@ -122,6 +125,7 @@ namespace ProxyProject_Backend.Controllers
             if (proxyPlan != null)
             {
                 proxyPlan.Name = model.Name;
+                proxyPlan.Code = model.Code;
                 proxyPlan.Price = model.Price;
                 proxyPlan.PriceUnit = model.PriceUnit;
                 proxyPlan.Description = model.Description;
@@ -136,6 +140,7 @@ namespace ProxyProject_Backend.Controllers
                     {
                         Id = proxyPlan.Id,
                         Name = proxyPlan.Name,
+                        Code = proxyPlan.Code,
                         Price = proxyPlan.Price,
                         PriceUnit = proxyPlan.PriceUnit,
                         Description = proxyPlan.Description

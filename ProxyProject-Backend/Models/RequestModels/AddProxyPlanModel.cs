@@ -6,6 +6,8 @@ namespace ProxyProject_Backend.Models.RequestModels
     {
         [Required(ErrorMessage = "Plan name is required")]
         public string Name { get; set; }
+        [Required(ErrorMessage = "Plan code is required")]
+        public string Code { get; set; }
         [Required(ErrorMessage = "Plan price is required")]
         public decimal Price { get; set; }
         [Required(ErrorMessage = "Price unit is required")]

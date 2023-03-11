@@ -214,6 +214,7 @@ namespace ProxyProject_Backend.Controllers
             //var bankAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
             _unitOfWork.BankAccountRepository.DeleteList(model.Ids);
             await _unitOfWork.SaveChangesAsync();
+
             return Ok(new ResponseModel
             {
                 Status = "Success",

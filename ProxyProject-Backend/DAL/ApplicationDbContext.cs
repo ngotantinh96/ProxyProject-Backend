@@ -27,6 +27,11 @@ namespace ProxyProject_Backend.DAL
                 .WithOne(x => x.ProxyKeyPlan)
                 .HasForeignKey(x => x.ProxyKeyPlanId);
 
+            builder.Entity<ProxyKeyPlansEntity>()
+              .HasMany(x => x.Proxies)
+              .WithOne(x => x.ProxyKeyPlan)
+              .HasForeignKey(x => x.ProxyKeyPlanId);
+
             builder.Entity<UserEntity>()
                 .HasMany(x => x.ProxyKeys)
                 .WithOne(x => x.User)
@@ -80,6 +85,7 @@ namespace ProxyProject_Backend.DAL
             { 
                 Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
                 Name = "Key Vip",
+                Code = "VN",
                 Price = 16000,
                 PriceUnit = "đ/key/ngày",
                 Description = "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội"
@@ -88,6 +94,7 @@ namespace ProxyProject_Backend.DAL
 
         public DbSet<ProxyKeyPlansEntity> ProxyKeyPlans { get; set; }
         public DbSet<ProxyKeysEntity> ProxyKeys { get; set; }
+        public DbSet<ProxyEntity> Proxy { get; set; }
         public DbSet<WalletHistoryEntity> WalletHistory { get; set; }
         public DbSet<BankAccountEntity> BankAccounts { get; set; }
         public DbSet<NotificationEntity> Notifications { get; set; }

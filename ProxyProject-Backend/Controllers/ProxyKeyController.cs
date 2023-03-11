@@ -37,6 +37,7 @@ namespace ProxyProject_Backend.Controllers
                 {
                     Id = x.Id,
                     Name = x.Name,
+                    Code = x.Code,
                     Price = x.Price,
                     PriceUnit = x.PriceUnit,
                     Description = x.Description
