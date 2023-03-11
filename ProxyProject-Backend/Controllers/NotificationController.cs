@@ -29,7 +29,7 @@ namespace ProxyProject_Backend.Controllers
 
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             {
-                filter = (x) => x.Message == model.Keyword;
+                filter = (x) => x.Message.Contains(model.Keyword);
             }
 
             var notifications = await _unitOfWork.NotificationRepository
