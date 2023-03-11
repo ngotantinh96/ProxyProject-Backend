@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace ProxyProject_Backend.Controllers
 {
-    [Route("api/notification")]
+    [Route("api/notifications")]
     [ApiController]
     [Authorize]
     public class NotificationController : ApiBaseController
@@ -22,14 +22,14 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpGet]
-        [Route("GetNotifications")]
+        [Route("")]
         public async Task<IActionResult> GetNotifications([FromQuery] GetListPagingModel model)
         {
             Expression<Func<NotificationEntity, bool>> filter = null;
 
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             {
-                filter = (x) => x.Message == model.Keyword;
+                filter = (x) => x.Message.Contains(model.Keyword);
             }
 
             var notifications = await _unitOfWork.NotificationRepository
@@ -76,7 +76,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpPost]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("AddNotification")]
+        [Route("")]
         public async Task<IActionResult> AddNotification(AddNotificationModel model)
         {
             var notification = await _unitOfWork.NotificationRepository.InsertAsync(new NotificationEntity
@@ -109,7 +109,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpPatch]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("UpdateNotification")]
+        [Route("")]
         public async Task<IActionResult> UpdateNotification(UpdateNotificationModel model)
         {
             var notification = await _unitOfWork.NotificationRepository.GetByIDAsync(model.Id);

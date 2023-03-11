@@ -165,7 +165,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpDelete]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("DeleteProxy")]
+        [Route("")]
         public async Task<IActionResult> DeleteProxy(DeleteProxyModel model)
         {
             _unitOfWork.ProxyRepository.DeleteList(model.Ids);
