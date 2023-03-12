@@ -80,8 +80,8 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpPost]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("AddProxy")]
-        public async Task<IActionResult> AddProxy([FromForm] AddProxyModel model)
+        [Route("")]
+        public async Task<IActionResult> AddProxy([FromBody] AddProxyModel model)
         {
             if (model.Proxies.Any())
             {
@@ -105,18 +105,18 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpGet]
-        [Route("GetProxies")]
+        [Route("")]
         public async Task<IActionResult> GetProxies([FromQuery] GetListPagingModel model)
         {
             Expression<Func<ProxyEntity, bool>> filter = null;
 
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             {
-                filter = (x) => x.Proxy == model.Keyword;
+                filter = (x) => x.Proxy.Contains(model.Keyword);
             }
 
             var notifications = await _unitOfWork.ProxyRepository
-                     .GetAsync(filter, x => x.OrderBy(p => p.Proxy), "", model.PageIndex, model.PageSize);
+                     .GetAsync(filter, x => x.OrderBy(p => p.Proxy), "ProxyKeyPlan", model.PageIndex, model.PageSize);
 
             return Ok(new ResponseModel
             {
@@ -129,6 +129,7 @@ namespace ProxyProject_Backend.Controllers
                     EndUsingTime = proxy.EndUsingTime,
                     CountryName = proxy.ProxyKeyPlan.Name,
                     CountryCode = proxy.ProxyKeyPlan.Code,
+                    ProxyKeyPlanId= proxy.ProxyKeyPlan.Id
                 }),
                 Total = await _unitOfWork.ProxyRepository.CountByFilterAsync()
             });

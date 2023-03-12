@@ -140,7 +140,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpDelete]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("DeleteNotification")]
+        [Route("")]
         public async Task<IActionResult> DeleteNotification(DeleteNotificationModel model)
         {
             //var notification = await _unitOfWork.NotificationRepository.GetByIDAsync(model.Id);
