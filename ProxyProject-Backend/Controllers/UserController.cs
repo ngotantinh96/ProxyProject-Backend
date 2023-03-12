@@ -242,7 +242,8 @@ namespace ProxyProject_Backend.Controllers
         [Route("")]
         public async Task<IActionResult> UpdateUser(UpdateUserModel model)
         {
-            var user = await _unitOfWork.UserRepository.GetByIDAsync(model.Id);
+            string id = model.Id.ToString();
+            var user = await _unitOfWork.UserRepository.GetByIDAsync(id);
 
             if (user != null)
             {
@@ -281,7 +282,7 @@ namespace ProxyProject_Backend.Controllers
         [HttpDelete]
         [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("")]
-        public async Task<IActionResult> DeleteUser([FromBody] DeleteUerModel model)
+        public async Task<IActionResult> DeleteUser([FromBody] DeleteUserModel model)
         {
             var list = await _unitOfWork.UserRepository.GetAsync(x => model.Ids.Contains(x.Id));
             if (list != null && list.Count> 0)
