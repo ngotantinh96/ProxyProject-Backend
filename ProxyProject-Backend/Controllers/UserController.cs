@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace ProxyProject_Backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     [Authorize]
     public class UserController : ApiBaseController
@@ -124,7 +124,7 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpGet]
-        [Route("GetUsers")]
+        [Route("")]
         public async Task<IActionResult> GetUsers([FromQuery] GetListPagingModel model)
         {
             Expression<Func<UserEntity, bool>> filter = null;
@@ -188,7 +188,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpPost]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("AddUser")]
+        [Route("")]
         public async Task<IActionResult> AddUser(AddUserModel model)
         {
             var user = new UserEntity()
@@ -239,7 +239,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpPatch]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("UpdateUser")]
+        [Route("")]
         public async Task<IActionResult> UpdateUser(UpdateUserModel model)
         {
             var user = await _unitOfWork.UserRepository.GetByIDAsync(model.Id);
@@ -280,14 +280,13 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpDelete]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        [Route("DeleteUser")]
-        public async Task<IActionResult> DeleteUser(RequestUserModel model)
+        [Route("")]
+        public async Task<IActionResult> DeleteUser([FromBody] DeleteUerModel model)
         {
-            var user = await _unitOfWork.UserRepository.GetByIDAsync(model.Id);
-
-            if (user != null)
+            var list = await _unitOfWork.UserRepository.GetAsync(x => model.Ids.Contains(x.Id));
+            if (list != null && list.Count> 0)
             {
-                _unitOfWork.UserRepository.Delete(user);
+                _unitOfWork.UserRepository.DeleteList(list);
                 await _unitOfWork.SaveChangesAsync();
 
                 return Ok(new ResponseModel
