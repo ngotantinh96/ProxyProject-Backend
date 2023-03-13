@@ -154,13 +154,14 @@ namespace ProxyProject_Backend.Controllers
         [HttpDelete]
         [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("DeleteProxyPlan")]
-        public async Task<IActionResult> DeleteProxyPlan(RequestProxyPlansModel model)
+        public async Task<IActionResult> DeleteProxyPlan(DeleteProxyKeyPlanRequestModel model)
         {
-            var ProxyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(model.Id);
+            var ProxyPlans = await _unitOfWork.ProxyKeyPlansRepository.GetAsync(x => model.Ids.Contains(x.Id));
 
-            if (ProxyPlan != null)
+
+            if (ProxyPlans != null)
             {
-                _unitOfWork.ProxyKeyPlansRepository.Delete(ProxyPlan);
+                _unitOfWork.ProxyKeyPlansRepository.DeleteList(ProxyPlans);
                 await _unitOfWork.SaveChangesAsync();
 
                 return Ok(new ResponseModel
