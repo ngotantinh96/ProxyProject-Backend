@@ -413,21 +413,21 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "1VlYYNoHZPSy9jRhA_jBN5ny7dtxt5Ip",
+                            APIKey = "bxy296yegSBn9U0Ih-hCjRf6b4rGsG8x",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "d79ff99b-b8ea-41e8-8136-89cf206f6b2a",
-                            Email = "ngotantinh96@gmail.com",
+                            ConcurrencyStamp = "cb0004f7-2701-417c-a8ba-7c448f137bdd",
+                            Email = "thhiens2th@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEHsnL1j7r44n1FF4Eme3pGiK18tySyK7FgY4zulQUc6IOD/mvSVtdpnMcX2hlfck7g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIrw9+yLJgAVImi47QWgj7OikbHuY7OBFRSPxOn3ENtdPbWFoUfAzIzKHUZc2wK6+g==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "23045105-c8e7-4aa5-b53c-3bf2009d49ba",
+                            SecurityStamp = "359326af-6f57-43fb-bbee-21fa88f1b3e4",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "6CZG9-YIeQPKloG8gAu79bqPuz7pPuGi"
+                            WalletKey = "eWL0sCsJAVK6CZYCz5JoxU9mxllNuegl"
                         });
                 });
 
