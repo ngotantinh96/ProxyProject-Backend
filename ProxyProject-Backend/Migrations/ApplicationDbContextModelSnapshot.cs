@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxyProject_Backend.DAL;
 
@@ -11,11 +10,9 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230303070245_AddTableWalletHistory")]
-    partial class AddTableWalletHistory
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,6 +43,20 @@ namespace ProxyProject_Backend.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "848e7b9c-5781-48cb-aa51-c2ee49961828",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        },
+                        new
+                        {
+                            Id = "fb2ec114-eb3c-499d-ab9d-ab8cb579c329",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -129,6 +140,13 @@ namespace ProxyProject_Backend.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
+                            RoleId = "fb2ec114-eb3c-499d-ab9d-ab8cb579c329"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -150,14 +168,103 @@ namespace ProxyProject_Backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.BankAccountEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("AccountName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("AccountNumber")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BankLogo")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BankName")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsMaintainance")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BankAccounts");
+                });
+
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.NotificationEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("NotificationType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("EndUsingTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Proxy")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("ProxyKeyPlanId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("StartUsingTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UsingByKey")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProxyKeyPlanId");
+
+                    b.ToTable("Proxy");
+                });
+
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("Code")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
@@ -176,7 +283,9 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
+                            Code = "VN",
                             Description = "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội",
+                            IsDeleted = false,
                             Name = "Key Vip",
                             Price = 16000m,
                             PriceUnit = "đ/key/ngày"
@@ -189,8 +298,14 @@ namespace ProxyProject_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<DateTime?>("EndUsingTime")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("ExpireDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Key")
                         .HasColumnType("longtext");
@@ -200,6 +315,9 @@ namespace ProxyProject_Backend.Migrations
 
                     b.Property<Guid>("ProxyKeyPlanId")
                         .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("StartUsingTime")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
@@ -231,15 +349,15 @@ namespace ProxyProject_Backend.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("DepositMemo")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("LimitKeysToCreate")
+                        .HasColumnType("int");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
@@ -290,6 +408,27 @@ namespace ProxyProject_Backend.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
+                            APIKey = "1VlYYNoHZPSy9jRhA_jBN5ny7dtxt5Ip",
+                            AccessFailedCount = 0,
+                            Balance = 0m,
+                            ConcurrencyStamp = "d79ff99b-b8ea-41e8-8136-89cf206f6b2a",
+                            Email = "ngotantinh96@gmail.com",
+                            EmailConfirmed = false,
+                            LimitKeysToCreate = 1000000,
+                            LockoutEnabled = false,
+                            PasswordHash = "AQAAAAIAAYagAAAAEHsnL1j7r44n1FF4Eme3pGiK18tySyK7FgY4zulQUc6IOD/mvSVtdpnMcX2hlfck7g==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "23045105-c8e7-4aa5-b53c-3bf2009d49ba",
+                            TotalDeposited = 0m,
+                            TwoFactorEnabled = true,
+                            UserName = "admin",
+                            WalletKey = "6CZG9-YIeQPKloG8gAu79bqPuz7pPuGi"
+                        });
                 });
 
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.WalletHistoryEntity", b =>
@@ -301,18 +440,21 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Note")
                         .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<string>("WalletKey")
-                        .HasColumnType("varchar(255)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("WalletKey");
+                    b.HasIndex("UserId");
 
                     b.ToTable("WalletHistory");
                 });
@@ -368,6 +510,17 @@ namespace ProxyProject_Backend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyEntity", b =>
+                {
+                    b.HasOne("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", "ProxyKeyPlan")
+                        .WithMany("Proxies")
+                        .HasForeignKey("ProxyKeyPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProxyKeyPlan");
+                });
+
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeysEntity", b =>
                 {
                     b.HasOne("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", "ProxyKeyPlan")
@@ -389,13 +542,15 @@ namespace ProxyProject_Backend.Migrations
                 {
                     b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
                         .WithMany("WalletHistories")
-                        .HasForeignKey("WalletKey");
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", b =>
                 {
+                    b.Navigation("Proxies");
+
                     b.Navigation("ProxyKeys");
                 });
 

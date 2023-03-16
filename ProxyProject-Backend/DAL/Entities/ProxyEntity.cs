@@ -7,6 +7,7 @@ namespace ProxyProject_Backend.DAL.Entities
         public string Proxy { get; set; }
         public DateTime? StartUsingTime { get; set; }
         public DateTime? EndUsingTime { get; set; }
+        public string UsingByKey { get; set; }
 
         public Guid ProxyKeyPlanId { get; set; }
         public virtual ProxyKeyPlansEntity ProxyKeyPlan { get; set; }

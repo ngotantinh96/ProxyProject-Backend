@@ -8,5 +8,6 @@ namespace ProxyProject_Backend.DAL.Entities.Interface
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public Guid Id { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }
