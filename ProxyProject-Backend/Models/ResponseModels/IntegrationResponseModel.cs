@@ -23,6 +23,23 @@ namespace ProxyProject_Backend.Models.Response
         public int MaxKey { get; set; }
     }
 
+    public class IntegrationUserProxyKeyModel
+    {
+        public string Key { get; set; }
+        public DateTime DateExpired { get; set; }
+        public EnumStatusKey Status { get; set; }
+        public string Description { get; set; }
+        public string Country { get; set; }
+    }
+
+    public class IntegrationProxyCountryModel
+    {
+        public Guid CountryId { get; set; }
+        public string Country { get; set; }
+        public decimal Price { get; set; }
+        public string PriceUnit { get; set; }
+    }
+
     public class IntegrationProxyModel
     {
         public string Proxy { get; set; }

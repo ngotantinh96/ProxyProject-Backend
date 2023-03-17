@@ -12,6 +12,7 @@ namespace ProxyProject_Backend.DAL.Entities
 
         public virtual List<ProxyKeysEntity> ProxyKeys { get; set; }
         public virtual List<WalletHistoryEntity> WalletHistories { get; set; }
+        public virtual List<ProxyHistoryEntity> ProxyHistories { get; set; }
     }
 
     public static class UserRolesConstant
