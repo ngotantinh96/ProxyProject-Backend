@@ -8,5 +8,8 @@
         public string AccountNumber { get; set; }
         public string BankLogo { get; set; }
         public bool IsMaintainance { get; set; }
+        public string ApiLink { get; set; }
+        public string Token { get; set; }
+
     }
 }
