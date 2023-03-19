@@ -10,6 +10,9 @@ namespace ProxyProject_Backend.Models.RequestModels
         public string AccountName { get; set; }
         [Required(ErrorMessage = "Bank account number is required")]
         public string AccountNumber { get; set; }
+        public string ApiLink { get; set; }
+        public string Token { get; set; }
+        public string Password { get; set; }
         public IFormFile BankLogo { get; set; }
 
         [Required(ErrorMessage = "IsMaintainance is required")]

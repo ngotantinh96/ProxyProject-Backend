@@ -52,7 +52,9 @@ namespace ProxyProject_Backend.Controllers
                     BankLogo = x.BankLogo,
                     AccountName = x.AccountName,
                     AccountNumber = x.AccountNumber,
-                    IsMaintainance = x.IsMaintainance
+                    IsMaintainance = x.IsMaintainance,
+                    ApiLink= x.ApiLink,
+                    Token= x.Token,
                 }),
                 Total = await _unitOfWork.BankAccountRepository.CountByFilterAsync()
             });
@@ -77,7 +79,9 @@ namespace ProxyProject_Backend.Controllers
                         BankLogo = backAccount.BankLogo,
                         AccountName = backAccount.AccountName,
                         AccountNumber = backAccount.AccountNumber,
-                        IsMaintainance = backAccount.IsMaintainance
+                        IsMaintainance = backAccount.IsMaintainance,
+                        ApiLink= backAccount.ApiLink,
+                        Token= backAccount.Token,
                     }
                 });
             }
@@ -154,6 +158,8 @@ namespace ProxyProject_Backend.Controllers
                 bankAccount.AccountName = model.AccountName;
                 bankAccount.AccountNumber = model.AccountNumber;
                 bankAccount.IsMaintainance = model.IsMaintainance;
+                bankAccount.ApiLink = model.ApiLink;
+                bankAccount.Token = model.Token;
 
                 _unitOfWork.BankAccountRepository.Update(bankAccount);
                 await _unitOfWork.SaveChangesAsync();
@@ -222,7 +228,20 @@ namespace ProxyProject_Backend.Controllers
                 Message = "Delete bank account successfully!"
             });
         }
-
+        [HttpGet]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        [Route("get-bank-dropdown")]
+        public IActionResult GetBankDropDown()
+        {
+            //var bankAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
+            List<Bank> banks = _configuration.GetSection("Banks").Get<List<Bank>>();
+            return Ok(new ResponseModel
+            {
+                Status = "Success",
+                Message = "",
+                Data = banks
+            });
+        }
         #region private functions
         private string UploadBankLogo(string bankName, IFormFile bankLogo, string oldBankLogo = "")
         {
@@ -256,6 +275,13 @@ namespace ProxyProject_Backend.Controllers
 
             return logoPath;
         }
+
         #endregion
+
+        public class Bank
+        {
+            public string Label { get; set; }
+            public string Value { get; set; }
+        }
     }
 }

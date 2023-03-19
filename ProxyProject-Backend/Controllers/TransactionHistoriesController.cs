@@ -46,6 +46,8 @@ namespace ProxyProject_Backend.Controllers
                     AccountNumber = x.BankAccount,
                     Comment= x.Comment,
                     Status= x.Status,
+                    Amount = x.Amount,
+                    TransactionId= x.TransactionId,
                 }),
                 Total = await _unitOfWork.WalletHistoryRepository.CountByFilterAsync()
             });

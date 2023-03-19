@@ -11,5 +11,7 @@ namespace ProxyProject_Backend.Models.ResponseModels
         public DateTime TransactionDate { get; set; }
         public string Comment { get; set; }
         public EnumTransactionStatus Status { get; set; }
+        public decimal Amount { get;set; }
+        public string TransactionId { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace ProxyProject_Backend.DAL.Entities
         public  DateTime TransactionDate { get; set; }
         public EnumTransactionStatus Status { get; set; }
         public decimal Amount { get; set; }
-
+        public string BankType { get; set; }
         public string UserId { get; set; }
         public UserEntity User { get; set; }
     }

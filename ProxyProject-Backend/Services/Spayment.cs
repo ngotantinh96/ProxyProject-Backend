@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.OpenApi.Any;
+using Newtonsoft.Json;
 using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.ResponseModels;
@@ -47,15 +48,16 @@ namespace ProxyProject_Backend.Services
             {
                 var transactionHistory = _unitOfWork.TransactionHistoryRepository
                 .GetAsync(p => p.BankId == bank.Id, p => p.OrderByDescending(t => t.TransactionDate), "", 0, 1).GetAwaiter().GetResult();
-
-                switch (bank.BankName)
+                switch (bank.BankName.ToUpper())
                 {
-                    case "Momo":
+                    case "MOMO":
                         GetMomoBank(bank, transactionHistory);
                         break;
-
-                    case "Vietcombank":
+                    case "VIETCOMBANK":
                         GetVCBBank(bank, transactionHistory);
+                        break;
+                    case "ACBBANK":
+                        GetACBBank(bank, transactionHistory);
                         break;
                 }
             });
@@ -63,9 +65,10 @@ namespace ProxyProject_Backend.Services
 
         private void GetMomoBank(BankAccountEntity bank, List<TransactionHistoryEntity> transactionHistory)
         {
-            string endpoint = !string.IsNullOrWhiteSpace(bank.ApiLink) ? bank.ApiLink : "https://api.spayment.vn/historyapimomo/";
+            string endpoint = !string.IsNullOrWhiteSpace(bank.ApiLink) ? bank.ApiLink : "https://api.spayment.vn/historyapimomo/token";
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "ABE98244-9B0D-AB34-A849-84961E1C1162";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
+            endpoint = endpoint.Replace("token", token);
             using (var httpClient = new HttpClient())
             {
                 var response = httpClient.GetAsync(endpoint + token).Result;
@@ -124,6 +127,7 @@ namespace ProxyProject_Backend.Services
                                         BankAccount = tran.partnerId,
                                         Amount = tran.amount ?? 0,
                                         BankId = bank.Id,
+                                        BankType ="MOMO",
                                         TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(tran.clientTime ?? 0),
                                         Comment = tran.comment,
                                         Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
@@ -158,6 +162,7 @@ namespace ProxyProject_Backend.Services
                                         Name = tran.partnerName,
                                         BankAccount = tran.partnerId,
                                         BankId = bank.Id,
+                                        BankType = "MOMO",
                                         Amount = tran.amount ?? 0,
                                         TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(tran.clientTime ?? 0),
                                         Comment = tran.comment,
@@ -220,6 +225,7 @@ namespace ProxyProject_Backend.Services
                                     Name = tran.SoThamChieu,
                                     BankAccount = tran.SoThamChieu,
                                     BankId = bank.Id,
+                                    BankType = "VIETCOMBANK",
                                     TransactionDate = DateTime.ParseExact(tran.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
                                     Comment = tran.MoTa,
                                     Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
@@ -254,10 +260,109 @@ namespace ProxyProject_Backend.Services
                                     TransactionId = tran.SoThamChieu,
                                     Name = tran.SoThamChieu,
                                     BankAccount = tran.SoThamChieu,
+                                    BankType = "VIETCOMBANK",
                                     BankId = bank.Id,
                                     TransactionDate = DateTime.ParseExact(tran.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
                                     Comment = tran.MoTa,
                                     Status = EnumTransactionStatus.FAIL,
+                                }).GetAwaiter();
+
+                                _unitOfWork.SaveChangesAsync().GetAwaiter().GetResult();
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        private void GetACBBank(BankAccountEntity bank, List<TransactionHistoryEntity> transactionHistory)
+        {
+            string endpoint = !string.IsNullOrWhiteSpace(bank.ApiLink) ? bank.ApiLink : "https://api.spayment.vn/historyapiacb/password/sotaikhoan/token";
+            string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
+            string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
+            string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
+            string password = bank.Password;
+            endpoint = endpoint.Replace("password", password).Replace("token", token).Replace("sotaikhoan", bankNumber);
+
+            using (var httpClient = new HttpClient())
+            {
+                var response = httpClient.GetAsync(endpoint).Result;
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var json = response.Content.ReadAsStringAsync().Result;
+                    ACBType acbObject = JsonConvert.DeserializeObject<ACBType>(json);
+
+                    if (acbObject.transactions != null && acbObject.transactions.Any())
+                    {
+                        var transactionList = new List<Transaction>();
+                        if (transactionHistory == null || transactionHistory.Count == 0)
+                        {
+                            transactionList.Add(acbObject.transactions.FirstOrDefault());
+                        }
+                        else
+                        {
+                            transactionList = acbObject.transactions
+                            .Where(_ => new DateTime(1970, 1, 1, 0, 0, 0, 0)
+                            .AddMilliseconds(_.activeDatetime) >= transactionHistory
+                            .FirstOrDefault().TransactionDate
+                            && !_.transactionNumber.ToString().Equals(transactionHistory
+                            .FirstOrDefault().TransactionId)).ToList();
+                        }
+
+                        // Save DB
+                        transactionList.ForEach(async tran =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(tran.description) && Guid.TryParse(tran.description?.Trim(), out Guid userId))
+                            {
+                                var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.Id == userId.ToString()).Result;
+
+                                _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
+                                {
+                                    TransactionId = tran.transactionNumber.ToString(),
+                                    Name = tran.transactionNumber.ToString(),
+                                    BankAccount = tran.transactionNumber.ToString(),
+                                    BankId = bank.Id,
+                                    BankType = "SACOMBANK",
+                                    TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0)
+                                        .AddMilliseconds(tran.activeDatetime),
+                                    Comment = tran.description,
+                                    Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
+                                    UserId = user.Id,
+                                }).GetAwaiter();
+
+                                /// Add Price
+                                if (user != null)
+                                {
+                                    decimal amout = Decimal.Parse(tran.amount.ToString());
+                                    user.Balance += amout;
+                                    user.TotalDeposited += amout;
+
+                                    _unitOfWork.UserRepository.Update(user);
+
+                                    // Update wallet history
+                                    _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                                    {
+                                        UserId = user.Id,
+                                        Value = amout,
+                                        CreatedDate = DateTime.UtcNow,
+                                        Note = $"Nap tien qua {bank.BankName}"
+                                    }).GetAwaiter();
+                                }
+
+                                _unitOfWork.SaveChangesAsync().GetAwaiter().GetResult();
+                            }
+                            else
+                            {
+                                _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
+                                {
+                                    TransactionId = tran.transactionNumber.ToString(),
+                                    Name = tran.transactionNumber.ToString(),
+                                    BankAccount = tran.transactionNumber.ToString(),
+                                    BankId = bank.Id,
+                                    BankType = "SACOMBANK",
+                                    TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0)
+                                        .AddMilliseconds(tran.activeDatetime),
+                                    Comment = tran.description,
+                                    Status = EnumTransactionStatus.FAIL
                                 }).GetAwaiter();
 
                                 _unitOfWork.SaveChangesAsync().GetAwaiter().GetResult();
