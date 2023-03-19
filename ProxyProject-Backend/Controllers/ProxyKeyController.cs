@@ -70,10 +70,6 @@ namespace ProxyProject_Backend.Controllers
 
                             for (int i = 0; i < model.NoOfKeys; i++)
                             {
-                                if (model.NoOfKeys - 2 == i)
-                                {
-                                    var a = 1;
-                                }
                                 listOrderedKey.Add(new ProxyKeysEntity
                                 {
                                     Key = await _proxyKeyService.GenerateProxyKeyAsync(),
@@ -109,6 +105,7 @@ namespace ProxyProject_Backend.Controllers
 
                         return BadRequest("Exceed limit keys to created");
                     }
+
                     return BadRequest("Balance is not enough");
                 }
 
@@ -153,7 +150,7 @@ namespace ProxyProject_Backend.Controllers
                             UserId = user.Id,
                             Value = -totalOrderedAmount,
                             CreatedDate = DateTime.UtcNow,
-                            Note = $"Mua {proxyKeys.Count()} keys - {model.NoOfDates} ngay."
+                            Note = $"Gia han {proxyKeys.Count()} keys - {model.NoOfDates} ngay."
                         });
 
                         await _unitOfWork.SaveChangesAsync();

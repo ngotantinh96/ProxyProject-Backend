@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxyProject_Backend.DAL;
 
@@ -10,9 +11,11 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230317124424_AddProxyHistoryTable")]
+    partial class AddProxyHistoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,9 +183,6 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<string>("AccountNumber")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("ApiLink")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("BankLogo")
                         .HasColumnType("longtext");
 
@@ -194,12 +194,6 @@ namespace ProxyProject_Backend.Migrations
 
                     b.Property<bool>("IsMaintainance")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Password")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -365,55 +359,6 @@ namespace ProxyProject_Backend.Migrations
                     b.ToTable("ProxyKeys");
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.TransactionHistoryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<string>("BankAccount")
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid>("BankId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("BankType")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("TransactionId")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TransactionHistories");
-                });
-
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.UserEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -496,21 +441,21 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "cAfzfPBBjaQhvirXrDf8BVEur6cekax3",
+                            APIKey = "0Ic4fH15lEOjmcaFZHumOE8V6kqf0xyY",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "11028b48-d9e1-437c-8989-a9cc768b4914",
-                            Email = "thhiens2th@gmail.com",
+                            ConcurrencyStamp = "47ecdca0-eef2-420b-aac3-73650f97fd61",
+                            Email = "ngotantinh96@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEJxyE1mAD7tgrLZX+GE9XlEeI/fwOhHFxm44ybl4eWDBhX83QqrO2h9ktCVDcuZx8w==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFyG15gj6//ph56GDkZPRC7DUfdSyeTkllvrYwOOsGChiydk3HuscZQKC5yE/4JD+Q==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "fe2b94dd-2434-447f-9fab-66839a363e1e",
+                            SecurityStamp = "c9dc1341-9758-4a47-81bf-e4b6b28bee69",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "3iOtvG7eJ221pBMVw1UydY9tyvOdh_G5"
+                            WalletKey = "cQ7157TQyG1Htd0AA7jJ4kbFcq_lwCN5"
                         });
                 });
 
@@ -630,15 +575,6 @@ namespace ProxyProject_Backend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.TransactionHistoryEntity", b =>
-                {
-                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
-                        .WithMany("TransactionHistories")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.WalletHistoryEntity", b =>
                 {
                     b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
@@ -660,8 +596,6 @@ namespace ProxyProject_Backend.Migrations
                     b.Navigation("ProxyHistories");
 
                     b.Navigation("ProxyKeys");
-
-                    b.Navigation("TransactionHistories");
 
                     b.Navigation("WalletHistories");
                 });

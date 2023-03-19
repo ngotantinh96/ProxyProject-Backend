@@ -47,6 +47,11 @@ namespace ProxyProject_Backend.DAL
                .WithOne(x => x.User)
                .HasForeignKey(x => x.UserId);
 
+            builder.Entity<UserEntity>()
+               .HasMany(x => x.ProxyHistories)
+               .WithOne(x => x.User)
+               .HasForeignKey(x => x.UserId);
+
             // Seed data config
             builder.Entity<IdentityRole>().HasData(new List<IdentityRole>
             {
@@ -106,5 +111,6 @@ namespace ProxyProject_Backend.DAL
         public DbSet<TransactionHistoryEntity> TransactionHistories { get; set; }
 
 
+        public DbSet<ProxyHistoryEntity> ProxyHistory { get; set; }
     }
 }

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.Response;
+using ProxyProject_Backend.Services.Interface;
+
 namespace ProxyProject_Backend.Controllers
 {
     [Route("api")]
@@ -10,13 +12,17 @@ namespace ProxyProject_Backend.Controllers
     public class IntegrationController : ApiBaseController
     {
         private readonly IConfiguration _configuration;
+        private readonly IProxyKeyService _proxyKeyService;
+
         public IntegrationController(
             ApplicationDbContext context,
             UserManager<UserEntity> userManager,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IProxyKeyService proxyKeyService
             ) : base(context, userManager)
         {
             _configuration = configuration;
+            _proxyKeyService = proxyKeyService;
         }
 
         [HttpPost]
@@ -32,8 +38,10 @@ namespace ProxyProject_Backend.Controllers
 
                 if (proxyKeys.Any())
                 {
+                    var proxyHistories = await _unitOfWork.ProxyHistoryRepository.GetAsync(x => x.UserId == user.Id && x.UsedTime.Date == DateTime.UtcNow.Date);
                     var proxyKey = proxyKeys.FirstOrDefault();
                     var proxies = await _unitOfWork.ProxyRepository.GetAsync(x => x.ProxyKeyPlanId == proxyKey.ProxyKeyPlanId 
+                        && !proxyHistories.Select(x => x.ProxyId).Any(p => p == x.Id)
                         && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "", 0, 1);
 
                     if (proxies.Any())
@@ -50,6 +58,13 @@ namespace ProxyProject_Backend.Controllers
                         proxy.StartUsingTime = startUsingTime;
                         proxy.EndUsingTime = endUsingTime;
                         proxy.UsingByKey = proxyKey.Key;
+
+                        await _unitOfWork.ProxyHistoryRepository.InsertAsync(new ProxyHistoryEntity
+                        {
+                            ProxyId = proxy.Id,
+                            UsedTime = DateTime.UtcNow,
+                            UserId = user.Id
+                        });
 
                         _unitOfWork.ProxyRepository.Update(proxy);
 
@@ -183,6 +198,39 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpGet]
+        [Route("GetUserKeys")]
+        public async Task<IActionResult> GetUserKeys(string apiKey)
+        {
+            var user = await _unitOfWork.UserRepository.GetByFilterAsync(x => x.APIKey == apiKey);
+
+            if (user != null)
+            {
+                var proxyKeys = await _unitOfWork.ProxyKeysRepository.GetAsync(x => x.UserId == user.Id,
+                    x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan");
+
+                return Ok(new IntegrationResponseModel
+                {
+                    Success = true,
+                    Description = string.Empty,
+                    Data = proxyKeys.Select(x => new IntegrationUserProxyKeyModel
+                    {
+                        Key = x.Key,
+                        Country = x.ProxyKeyPlan?.Name,
+                        DateExpired = x.ExpireDate,
+                        Status = x.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING : EnumStatusKey.EXPIRED,
+                        Description = x.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING.ToString() : EnumStatusKey.EXPIRED.ToString(),
+                    })
+                });
+            }
+
+            return BadRequest(new IntegrationCommonResponseModel
+            {
+                Success = false,
+                Description = "Wrong user api key!"
+            });
+        }
+
+        [HttpGet]
         [Route("GetUserInfo")]
         public async Task<IActionResult> GetUserInfo(string apiKey)
         {
@@ -211,59 +259,213 @@ namespace ProxyProject_Backend.Controllers
             });
         }
 
+        [HttpGet]
+        [Route("GetProxyCountries")]
+        public async Task<IActionResult> GetProxyCountries()
+        {
+            var proxyCountries = await _unitOfWork.ProxyKeyPlansRepository.GetAsync();
+
+            return Ok(new IntegrationResponseModel
+            {
+                Success = true,
+                Description = string.Empty,
+                Data = proxyCountries.Select(x => new IntegrationProxyCountryModel
+                {
+                    CountryId = x.Id,
+                    Country = x.Name,
+                    Price = x.Price,
+                    PriceUnit = x.PriceUnit
+                })
+            });
+        }
+
         [HttpPost]
-        [Route("ExtendKey")]
-        public async Task<IActionResult> ExtendKey(string apiKey)
+        [Route("OrderKeys")]
+        public async Task<IActionResult> OrderKeys(string apiKey, int quantity, int days, Guid countryId, string referer)
         {
             var user = await _unitOfWork.UserRepository.GetByFilterAsync(x => x.APIKey == apiKey);
 
             if (user != null)
             {
-                //var proxyKeys = await _unitOfWork.ProxyKeysRepository
-                //    .GetAsync(x => x.UserId == user.Id && model.Keys.Contains(x.Key), null, "ProxyKeyPlan");
+                if(quantity > 0)
+                {
+                    if (days > 0)
+                    {
+                        var proxyKeyCountry = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(countryId);
 
-                //if (proxyKeys.Any())
-                //{
-                //    var totalOrderedAmount = proxyKeys.Sum(x => x.ProxyKeyPlan.Price * model.NoOfDates);
+                        if(proxyKeyCountry != null)
+                        {
+                            var totalOrderedAmount = quantity * days * proxyKeyCountry.Price;
 
-                //    if (totalOrderedAmount <= user.Balance)
-                //    {
-                //        // Perform orders
-                //        foreach (var proxyKey in proxyKeys)
-                //        {
-                //            proxyKey.ExpireDate = proxyKey.ExpireDate.AddDays(model.NoOfDates);
-                //        }
+                            if (totalOrderedAmount <= user.Balance)
+                            {
+                                var noOfCreatedKeys = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id);
 
-                //        _unitOfWork.ProxyKeysRepository.UpdateList(proxyKeys);
+                                if ((noOfCreatedKeys + quantity) <= user.LimitKeysToCreate)
+                                {
+                                    // Perform orders
+                                    var listOrderedKey = new List<ProxyKeysEntity>();
 
-                //        // Update user balance
-                //        user.Balance -= totalOrderedAmount;
-                //        _unitOfWork.UserRepository.Update(user);
+                                    for (int i = 0; i < quantity; i++)
+                                    {
+                                        listOrderedKey.Add(new ProxyKeysEntity
+                                        {
+                                            Key = await _proxyKeyService.GenerateProxyKeyAsync(),
+                                            ProxyKeyPlanId = proxyKeyCountry.Id,
+                                            ExpireDate = DateTime.UtcNow.AddDays(days),
+                                            UserId = user.Id
+                                        });
+                                    }
 
-                //        // Update wallet history
-                //        await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
-                //        {
-                //            UserId = user.Id,
-                //            Value = -totalOrderedAmount,
-                //            CreatedDate = DateTime.UtcNow,
-                //            Note = $"Mua {proxyKeys.Count()} keys - {model.NoOfDates} ngay."
-                //        });
+                                    await _unitOfWork.ProxyKeysRepository.InsertListAsync(listOrderedKey);
 
-                //        await _unitOfWork.SaveChangesAsync();
+                                    // Update user balance
+                                    user.Balance -= totalOrderedAmount;
+                                    _unitOfWork.UserRepository.Update(user);
 
-                //        return Ok(new ResponseModel
-                //        {
-                //            Status = "Success",
-                //            Data = model.Keys
-                //        });
-                //    }
-                //    return BadRequest("Balance is not enough");
-                //}
+                                    // Update wallet history
+                                    await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                                    {
+                                        UserId = user.Id,
+                                        Value = -totalOrderedAmount,
+                                        CreatedDate = DateTime.UtcNow,
+                                        Note = $"Mua {quantity} keys - {days} ngay. {proxyKeyCountry.Name}"
+                                    });
 
-                return BadRequest("Keys not found");
+                                    await _unitOfWork.SaveChangesAsync();
+
+                                    return Ok(new IntegrationResponseModel
+                                    {
+                                        Success = true,
+                                        Description = string.Empty,
+                                        Data = listOrderedKey.Select(x => new IntegrationUserProxyKeyModel
+                                        {
+                                            Key = x.Key,
+                                            Country = proxyKeyCountry.Name,
+                                            DateExpired = x.ExpireDate,
+                                            Status = x.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING : EnumStatusKey.EXPIRED,
+                                            Description = x.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING.ToString() : EnumStatusKey.EXPIRED.ToString(),
+                                        })
+                                    });
+                                }
+
+                                return BadRequest(new IntegrationCommonResponseModel
+                                {
+                                    Success = false,
+                                    Description = "Exceed limit keys to created!"
+                                });
+                            }
+
+                            return BadRequest(new IntegrationCommonResponseModel
+                            {
+                                Success = false,
+                                Description = "Balance is not enough!"
+                            });
+                        }
+
+                        return BadRequest(new IntegrationCommonResponseModel
+                        {
+                            Success = false,
+                            Description = "Wrong country id!"
+                        });
+                    }
+
+                    return BadRequest(new IntegrationCommonResponseModel
+                    {
+                        Success = false,
+                        Description = "Days must greater than 0!"
+                    });
+                }
+
+                return BadRequest(new IntegrationCommonResponseModel
+                {
+                    Success = false,
+                    Description = "Quantity must greater than 0!"
+                });
             }
 
-            return BadRequest("Empty User");
+            return BadRequest(new IntegrationCommonResponseModel
+            {
+                Success = false,
+                Description = "Wrong user api key!"
+            });
+        }
+
+        [HttpPost]
+        [Route("ExtendKey")]
+        public async Task<IActionResult> ExtendKey(string apiKey, string proxyKey, int days, string referer)
+        {
+            var user = await _unitOfWork.UserRepository.GetByFilterAsync(x => x.APIKey == apiKey);
+
+            if (user != null)
+            {
+                var proxyKeyInfo = await _unitOfWork.ProxyKeysRepository.GetByFilterAsync(x => x.Key == proxyKey);
+
+                if(proxyKeyInfo != null)
+                {
+                    if (days > 0)
+                    {
+                        var proxyKeyCountry = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(proxyKeyInfo.ProxyKeyPlanId);
+
+                        var totalOrderedAmount = proxyKeyCountry.Price * days;
+
+                        if (totalOrderedAmount <= user.Balance)
+                        {
+                            proxyKeyInfo.ExpireDate = proxyKeyInfo.ExpireDate.AddDays(days);
+                            _unitOfWork.ProxyKeysRepository.Update(proxyKeyInfo);
+
+                            // Update user balance
+                            user.Balance -= totalOrderedAmount;
+                            _unitOfWork.UserRepository.Update(user);
+
+                            // Update wallet history
+                            await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                            {
+                                UserId = user.Id,
+                                Value = -totalOrderedAmount,
+                                CreatedDate = DateTime.UtcNow,
+                                Note = $"Gia han 1 key - {days} ngay."
+                            });
+
+                            await _unitOfWork.SaveChangesAsync();
+
+                            return Ok(new IntegrationResponseModel
+                            {
+                                Success = true,
+                                Description = string.Empty,
+                                Data = new IntegrationUserProxyKeyModel
+                                {
+                                    Key = proxyKeyInfo.Key,
+                                    Country = proxyKeyCountry.Name,
+                                    DateExpired = proxyKeyInfo.ExpireDate,
+                                    Status = proxyKeyInfo.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING : EnumStatusKey.EXPIRED,
+                                    Description = proxyKeyInfo.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING.ToString() : EnumStatusKey.EXPIRED.ToString(),
+                                }
+                            });
+                        }
+
+                        return BadRequest("Balance is not enough");
+                    }
+
+                    return BadRequest(new IntegrationCommonResponseModel
+                    {
+                        Success = false,
+                        Description = "Days must greater than 0!"
+                    });
+                }
+
+                return BadRequest(new IntegrationCommonResponseModel
+                {
+                    Success = false,
+                    Description = "Wrong proxy key!"
+                });
+            }
+
+            return BadRequest(new IntegrationCommonResponseModel
+            {
+                Success = false,
+                Description = "Wrong user api key!"
+            });
         }
     }
 }
