@@ -60,7 +60,7 @@ namespace ProxyProject_Backend.Controllers
         [HttpPatch]
         [Route("ProcessPendingTransacion")]
         [Authorize(Roles = UserRolesConstant.Admin)]
-        public async Task<IActionResult> ProcessPendingTransacion(RequestTransactionModel model)
+        public async Task<IActionResult> ProcessPendingTransacion(ProcessPendingTransacionModel model)
         {
             var transaction = await _unitOfWork.TransactionHistoryRepository.GetByIDAsync(model.Id);
 
@@ -70,6 +70,11 @@ namespace ProxyProject_Backend.Controllers
 
                 if (user != null)
                 {
+                    if(model.Amount > 0)
+                    {
+                        transaction.Amount = model.Amount;
+                    }
+
                     transaction.Status = EnumTransactionStatus.SUCCESS;
 
                     _unitOfWork.TransactionHistoryRepository.Update(transaction);
