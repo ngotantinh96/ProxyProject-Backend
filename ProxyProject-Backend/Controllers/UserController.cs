@@ -306,7 +306,7 @@ namespace ProxyProject_Backend.Controllers
         [Authorize(Roles = UserRolesConstant.Admin)]
         public async Task<IActionResult> DepositMoneyForUser(DepositMoneyForUserModel model)
         {
-            var user = await GetCurrentUser();
+            var user = await _unitOfWork.UserRepository.GetByFilterAsync(x => x.UserName == model.UserName);
 
             if (user != null)
             {
@@ -316,12 +316,12 @@ namespace ProxyProject_Backend.Controllers
                 _unitOfWork.UserRepository.Update(user);
 
                 // Update wallet history
-                await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity(await GetCurrentUser())
                 {
                     UserId = user.Id,
                     Value = model.Amount,
                     CreatedDate = DateTime.UtcNow,
-                    Note = $"Admin nap tien cho user"
+                    Note = string.IsNullOrWhiteSpace(model.Note) ? $"Admin nap tien cho user" : model.Note,
                 });
 
                 await _unitOfWork.SaveChangesAsync();

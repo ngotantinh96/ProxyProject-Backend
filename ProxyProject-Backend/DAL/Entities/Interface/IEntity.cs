@@ -9,5 +9,7 @@ namespace ProxyProject_Backend.DAL.Entities.Interface
         [Key]
         public Guid Id { get; set; }
         public bool IsDeleted { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public string CreatedBy { get; set; }
     }
 }

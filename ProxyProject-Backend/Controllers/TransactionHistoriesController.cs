@@ -1,15 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.DAL;
+using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
-using static Dapper.SqlMapper;
-using System.Linq.Expressions;
 using ProxyProject_Backend.Models.Response;
 using ProxyProject_Backend.Models.ResponseModels;
-using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace ProxyProject_Backend.Controllers
 {
@@ -33,7 +31,7 @@ namespace ProxyProject_Backend.Controllers
 
             if (!string.IsNullOrWhiteSpace(request.Keyword))
             {
-                filter = (x) => x.User.UserName == request.Keyword;
+                filter = (x) => x.BankType.Contains(request.Keyword);
             }
 
             var result = await _unitOfWork.TransactionHistoryRepository.GetAsync(filter, orderBy,"User",request.Page, request.Size ?? 10);
@@ -52,6 +50,7 @@ namespace ProxyProject_Backend.Controllers
                     Status = x.Status,
                     Amount = x.Amount,
                     TransactionId= x.TransactionId,
+                    TransactionType = x.BankType
                 }),
                 Total = await _unitOfWork.TransactionHistoryRepository.CountByFilterAsync()
             });
@@ -67,8 +66,9 @@ namespace ProxyProject_Backend.Controllers
             if (transaction != null)
             {
                 var user = await GetCurrentUser();
+                var userPayment = await _unitOfWork.UserRepository.GetByFilterAsync(x => x.UserName.Equals(model.UserName));
 
-                if (user != null)
+                if (user != null && userPayment != null)
                 {
                     if(model.Amount > 0)
                     {
@@ -76,20 +76,21 @@ namespace ProxyProject_Backend.Controllers
                     }
 
                     transaction.Status = EnumTransactionStatus.SUCCESS;
-
+                    transaction.CreatedBy = user.Id;
+                    transaction.Comment = !string.IsNullOrWhiteSpace(model.Note) ? model.Note : user.Id;
                     _unitOfWork.TransactionHistoryRepository.Update(transaction);
 
-                    user.Balance += transaction.Amount;
-                    user.TotalDeposited += transaction.Amount;
-
-                    _unitOfWork.UserRepository.Update(user);
+                    userPayment.Balance += transaction.Amount;
+                    userPayment.TotalDeposited += transaction.Amount;
+                    transaction.UserId = userPayment.Id;
+                    _unitOfWork.UserRepository.Update(userPayment);
 
                     // Update wallet history
                     var bank = await _unitOfWork.BankAccountRepository.GetByIDAsync(transaction.BankId);
                     var bankName = bank != null ? bank.BankName : transaction.BankType;
-                    await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                    await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity(await GetCurrentUser())
                     {
-                        UserId = user.Id,
+                        UserId = userPayment.Id,
                         Value = transaction.Amount,
                         CreatedDate = DateTime.UtcNow,
                         Note = $"Nap tien qua {bankName}"

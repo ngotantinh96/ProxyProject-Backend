@@ -109,7 +109,7 @@ namespace ProxyProject_Backend.Controllers
 
                     if(!string.IsNullOrWhiteSpace(model.Password))
                     {
-                        bankAccount.Password = StringUtils.Encrypt(model.Password, _configuration["PasswordEncryptKey"]);
+                        bankAccount.Password = StringUtils.EncryptPassword(model.Password, _configuration["PasswordEncryptKey"]);
                     }
 
                     await _unitOfWork.SaveChangesAsync();

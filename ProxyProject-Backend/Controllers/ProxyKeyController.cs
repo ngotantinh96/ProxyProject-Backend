@@ -86,7 +86,7 @@ namespace ProxyProject_Backend.Controllers
                             _unitOfWork.UserRepository.Update(user);
 
                             // Update wallet history
-                            await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                            await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity()
                             {
                                 UserId = user.Id,
                                 Value = -totalOrderedAmount,
