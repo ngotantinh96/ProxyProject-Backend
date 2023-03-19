@@ -107,6 +107,11 @@ namespace ProxyProject_Backend.Controllers
                         IsMaintainance = false
                     });
 
+                    if(!string.IsNullOrWhiteSpace(model.Password))
+                    {
+                        bankAccount.Password = StringUtils.Encrypt(model.Password, _configuration["PasswordEncryptKey"]);
+                    }
+
                     await _unitOfWork.SaveChangesAsync();
 
                     if (bankAccount != null)
@@ -228,12 +233,12 @@ namespace ProxyProject_Backend.Controllers
                 Message = "Delete bank account successfully!"
             });
         }
+
         [HttpGet]
         [Authorize(Roles = UserRolesConstant.Admin)]
         [Route("get-bank-dropdown")]
         public IActionResult GetBankDropDown()
         {
-            //var bankAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
             List<Bank> banks = _configuration.GetSection("Banks").Get<List<Bank>>();
             return Ok(new ResponseModel
             {
@@ -241,6 +246,26 @@ namespace ProxyProject_Backend.Controllers
                 Message = "",
                 Data = banks
             });
+        }
+
+        [HttpPost]
+        [Route("ChangeBankPassword")]
+        public async Task<IActionResult> ChangeBankPassword(ChangeBankPasswordModel model)
+        {
+            var bankAccount = await _unitOfWork.BankAccountRepository.GetByIDAsync(model.Id);
+
+            if (bankAccount != null)
+            {
+                bankAccount.Password = !string.IsNullOrWhiteSpace(model.Password) ? StringUtils.Encrypt(model.Password, _configuration["PasswordEncryptKey"]) : model.Password;
+
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Message = "Update bank password successfully!"
+                });
+            }
+
+            return BadRequest("Bank account not found");
         }
         #region private functions
         private string UploadBankLogo(string bankName, IFormFile bankLogo, string oldBankLogo = "")

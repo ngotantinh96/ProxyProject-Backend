@@ -3,6 +3,7 @@ using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.ResponseModels;
 using ProxyProject_Backend.Services.Interface;
+using ProxyProject_Backend.Utils;
 using System.Globalization;
 
 namespace ProxyProject_Backend.Services
@@ -180,7 +181,7 @@ namespace ProxyProject_Backend.Services
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
-            string password = bank.Password;
+            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.Decrypt(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
             endpoint = endpoint.Replace("password", password).Replace("token", token).Replace("sotaikhoan", bankNumber);
 
             using (var httpClient = new HttpClient())
@@ -276,7 +277,7 @@ namespace ProxyProject_Backend.Services
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
-            string password = bank.Password;
+            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.Decrypt(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
             endpoint = endpoint.Replace("password", password).Replace("token", token).Replace("sotaikhoan", bankNumber);
 
             using (var httpClient = new HttpClient())

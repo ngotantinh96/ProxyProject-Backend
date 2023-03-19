@@ -12,5 +12,6 @@ namespace ProxyProject_Backend.Models.RequestModels
         public string AccountNumber { get; set; }
         public IFormFile BankLogo { get; set; }
         public bool IsMaintainance { get; set; }
+        public string Password { get; set; }
     }
 }

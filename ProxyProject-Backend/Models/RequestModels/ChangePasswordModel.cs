@@ -9,4 +9,5 @@ namespace ProxyProject_Backend.Models.RequestModels
         [Required(ErrorMessage = "New password is required")]
         public string NewPassword { get; set; }
     }
+
 }
