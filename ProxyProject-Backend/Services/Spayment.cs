@@ -109,24 +109,24 @@ namespace ProxyProject_Backend.Services
                         }
 
                         // Save DB
-                        transactionList.ForEach(tran =>
+                        transactionList.ForEach(transaction =>
                         {
-                            if(_unitOfWork.TransactionHistoryRepository.GetByFilterAsync(x => x.TransactionId == tran.tranId.ToString()).Result == null)
+                            if(_unitOfWork.TransactionHistoryRepository.GetByFilterAsync(x => x.TransactionId == transaction.tranId.ToString()).Result == null)
                             {
-                                if (!string.IsNullOrWhiteSpace(tran.comment) && Guid.TryParse(tran.comment?.Trim(), out Guid userId))
+                                if (!string.IsNullOrWhiteSpace(transaction.comment) && Guid.TryParse(transaction.comment?.Trim(), out Guid userId))
                                 {
                                     var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.Id == userId.ToString()).Result;
 
                                     _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                     {
-                                        TransactionId = tran.tranId.ToString(),
-                                        Name = tran.partnerName,
-                                        BankAccount = tran.partnerId,
-                                        Amount = tran.amount ?? 0,
+                                        TransactionId = transaction.tranId.ToString(),
+                                        Name = transaction.partnerName,
+                                        BankAccount = transaction.partnerId,
+                                        Amount = transaction.amount ?? 0,
                                         BankId = bank.Id,
                                         BankType ="MOMO",
-                                        TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(tran.clientTime ?? 0),
-                                        Comment = tran.comment,
+                                        TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(transaction.clientTime ?? 0),
+                                        Comment = transaction.comment,
                                         Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
                                         UserId = user.Id,
                                     }).GetAwaiter();
@@ -134,8 +134,8 @@ namespace ProxyProject_Backend.Services
                                     /// Add Price
                                     if (user != null)
                                     {
-                                        user.Balance += tran.amount ?? 0;
-                                        user.TotalDeposited += tran.amount ?? 0;
+                                        user.Balance += transaction.amount ?? 0;
+                                        user.TotalDeposited += transaction.amount ?? 0;
 
                                         _unitOfWork.UserRepository.Update(user);
 
@@ -143,7 +143,7 @@ namespace ProxyProject_Backend.Services
                                         _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
                                         {
                                             UserId = user.Id,
-                                            Value = tran.amount ?? 0,
+                                            Value = transaction.amount ?? 0,
                                             CreatedDate = DateTime.UtcNow,
                                             Note = $"Nap tien qua {bank.BankName}"
                                         }).GetAwaiter();
@@ -155,14 +155,14 @@ namespace ProxyProject_Backend.Services
                                 {
                                     _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                     {
-                                        TransactionId = tran.tranId.ToString(),
-                                        Name = tran.partnerName,
-                                        BankAccount = tran.partnerId,
+                                        TransactionId = transaction.tranId.ToString(),
+                                        Name = transaction.partnerName,
+                                        BankAccount = transaction.partnerId,
                                         BankId = bank.Id,
                                         BankType = "MOMO",
-                                        Amount = tran.amount ?? 0,
-                                        TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(tran.clientTime ?? 0),
-                                        Comment = tran.comment,
+                                        Amount = transaction.amount ?? 0,
+                                        TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(transaction.clientTime ?? 0),
+                                        Comment = transaction.comment,
                                         Status = EnumTransactionStatus.FAIL,
                                     }).GetAwaiter();
 
@@ -210,21 +210,21 @@ namespace ProxyProject_Backend.Services
                         }
 
                         // Save DB
-                        transactionList.ForEach(async tran =>
+                        transactionList.ForEach(transaction =>
                         {
-                            if (!string.IsNullOrWhiteSpace(tran.MoTa) && Guid.TryParse(tran.MoTa?.Trim(), out Guid userId))
+                            if (!string.IsNullOrWhiteSpace(transaction.MoTa) && Guid.TryParse(transaction.MoTa?.Trim(), out Guid userId))
                             {
                                 var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.Id == userId.ToString()).Result;
 
                                 _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                 {
-                                    TransactionId = tran.SoThamChieu,
-                                    Name = tran.SoThamChieu,
-                                    BankAccount = tran.SoThamChieu,
+                                    TransactionId = transaction.SoThamChieu,
+                                    Name = transaction.SoThamChieu,
+                                    BankAccount = transaction.SoThamChieu,
                                     BankId = bank.Id,
                                     BankType = "VIETCOMBANK",
-                                    TransactionDate = DateTime.ParseExact(tran.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
-                                    Comment = tran.MoTa,
+                                    TransactionDate = DateTime.ParseExact(transaction.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                    Comment = transaction.MoTa,
                                     Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
                                     UserId = user.Id,
                                 }).GetAwaiter();
@@ -232,7 +232,7 @@ namespace ProxyProject_Backend.Services
                                 /// Add Price
                                 if (user != null)
                                 {
-                                    decimal amout = Decimal.Parse(tran.SoTienGhiCo.Replace(",", ""));
+                                    decimal amout = Decimal.Parse(transaction.SoTienGhiCo.Replace(",", ""));
                                     user.Balance += amout;
                                     user.TotalDeposited += amout;
 
@@ -254,13 +254,13 @@ namespace ProxyProject_Backend.Services
                             {
                                 _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                 {
-                                    TransactionId = tran.SoThamChieu,
-                                    Name = tran.SoThamChieu,
-                                    BankAccount = tran.SoThamChieu,
+                                    TransactionId = transaction.SoThamChieu,
+                                    Name = transaction.SoThamChieu,
+                                    BankAccount = transaction.SoThamChieu,
                                     BankType = "VIETCOMBANK",
                                     BankId = bank.Id,
-                                    TransactionDate = DateTime.ParseExact(tran.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
-                                    Comment = tran.MoTa,
+                                    TransactionDate = DateTime.ParseExact(transaction.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                    Comment = transaction.MoTa,
                                     Status = EnumTransactionStatus.FAIL,
                                 }).GetAwaiter();
 
@@ -306,21 +306,21 @@ namespace ProxyProject_Backend.Services
                         }
 
                         // Save DB
-                        transactionList.ForEach(async tran =>
+                        transactionList.ForEach(transaction =>
                         {
-                            if (!string.IsNullOrWhiteSpace(tran.description) && Guid.TryParse(tran.description?.Trim(), out Guid userId))
+                            if (!string.IsNullOrWhiteSpace(transaction.description) && Guid.TryParse(transaction.description?.Trim(), out Guid userId))
                             {
                                 var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.Id == userId.ToString()).Result;
 
                                 _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                 {
-                                    TransactionId = tran.transactionNumber.ToString(),
-                                    Name = tran.transactionNumber.ToString(),
-                                    BankAccount = tran.transactionNumber.ToString(),
+                                    TransactionId = transaction.transactionNumber.ToString(),
+                                    Name = transaction.transactionNumber.ToString(),
+                                    BankAccount = transaction.transactionNumber.ToString(),
                                     BankId = bank.Id,
                                     BankType = "ACBBANK",
-                                    TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(tran.activeDatetime),
-                                    Comment = tran.description,
+                                    TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(transaction.activeDatetime),
+                                    Comment = transaction.description,
                                     Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
                                     UserId = user.Id,
                                 }).GetAwaiter();
@@ -328,7 +328,7 @@ namespace ProxyProject_Backend.Services
                                 /// Add Price
                                 if (user != null)
                                 {
-                                    decimal amout = Decimal.Parse(tran.amount.ToString());
+                                    decimal amout = Decimal.Parse(transaction.amount.ToString());
                                     user.Balance += amout;
                                     user.TotalDeposited += amout;
 
@@ -350,14 +350,14 @@ namespace ProxyProject_Backend.Services
                             {
                                 _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                 {
-                                    TransactionId = tran.transactionNumber.ToString(),
-                                    Name = tran.transactionNumber.ToString(),
-                                    BankAccount = tran.transactionNumber.ToString(),
+                                    TransactionId = transaction.transactionNumber.ToString(),
+                                    Name = transaction.transactionNumber.ToString(),
+                                    BankAccount = transaction.transactionNumber.ToString(),
                                     BankId = bank.Id,
                                     BankType = "ACBBANK",
                                     TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0)
-                                        .AddMilliseconds(tran.activeDatetime),
-                                    Comment = tran.description,
+                                        .AddMilliseconds(transaction.activeDatetime),
+                                    Comment = transaction.description,
                                     Status = EnumTransactionStatus.FAIL
                                 }).GetAwaiter();
 
