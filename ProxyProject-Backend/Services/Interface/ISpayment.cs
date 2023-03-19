@@ -5,6 +5,6 @@
         void SendEmail();
         void UpdateDatabase();
         void GenerateMerchandise();
-        Task SyncRecords();
+        void SyncRecords();
     }
 }

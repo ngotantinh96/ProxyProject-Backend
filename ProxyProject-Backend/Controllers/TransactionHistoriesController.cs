@@ -23,7 +23,7 @@ namespace ProxyProject_Backend.Controllers
 
         }
         [HttpGet]
-        public async Task<IActionResult> GetTransactionHistory(GetTransactionHistoryRequestModel request)
+        public async Task<IActionResult> GetTransactionHistory([FromQuery] GetTransactionHistoryRequestModel request)
         {
             Expression<Func<TransactionHistoryEntity, bool>> filter = null;
             Func<IQueryable<TransactionHistoryEntity>, IOrderedQueryable<TransactionHistoryEntity>> orderBy = (x) => x.OrderByDescending(p => p.TransactionDate);

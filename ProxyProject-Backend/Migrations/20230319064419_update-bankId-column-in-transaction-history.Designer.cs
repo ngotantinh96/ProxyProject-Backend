@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxyProject_Backend.DAL;
 
@@ -10,9 +11,11 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230319064419_update-bankId-column-in-transaction-history")]
+    partial class updatebankIdcolumnintransactionhistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -346,9 +349,6 @@ namespace ProxyProject_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(65,30)");
-
                     b.Property<string>("BankAccount")
                         .HasColumnType("longtext");
 
@@ -356,9 +356,6 @@ namespace ProxyProject_Backend.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("Comment")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CreatedBy")
                         .HasColumnType("longtext");
 
                     b.Property<bool>("IsDeleted")
@@ -468,21 +465,21 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "hyNErwWeuV9crUFo5VRGpRnpglNhEcmi",
+                            APIKey = "CMM3hVWZAKnLcIqGO5zZhbg_3XexHpJ1",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "ba8eae7a-8d2e-4833-88dc-27506e8661b1",
+                            ConcurrencyStamp = "38939643-0a40-4be4-af3c-7a6ae985d2b3",
                             Email = "thhiens2th@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEMzo9JtxuW1H0Kb2Kv9eja0RDDH+slbAZcgNqZNH4m+APsdwHFSsXlbpjIkbJT4kVw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEArR8t+H96fj8vIb24YtDDAu00S6I2xIeZ//d9BCp+QN+vVbIgG/JcrwfETut0co3g==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7cde9ad6-2230-484a-9f95-079cbec32abb",
+                            SecurityStamp = "3c71eb65-31a6-417f-8766-1bb557fc5159",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "lnQms4w6YPt3gnxuKr1WMA_Y1BhaD2ew"
+                            WalletKey = "tF6jsZ5bYgY-siBJXuS2JbfKHsHtR0jM"
                         });
                 });
 

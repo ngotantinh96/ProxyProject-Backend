@@ -165,7 +165,7 @@ namespace ProxyProject_Backend
                 //}
             });
             app.MapHangfireDashboard();
-            RecurringJob.AddOrUpdate<Spayment>(x => x.SyncRecords(), Cron.Minutely);
+            RecurringJob.AddOrUpdate<Spayment>(x => x.SyncRecords(), "*/5 * * * *");
             app.Run();
         }
     }

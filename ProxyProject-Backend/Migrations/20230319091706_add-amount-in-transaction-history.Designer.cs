@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxyProject_Backend.DAL;
 
@@ -10,9 +11,11 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230319091706_add-amount-in-transaction-history")]
+    partial class addamountintransactionhistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -358,9 +361,6 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -468,21 +468,21 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "hyNErwWeuV9crUFo5VRGpRnpglNhEcmi",
+                            APIKey = "uJnO5dicLm3BAiaDk9yrhKW9nZyGWaUY",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "ba8eae7a-8d2e-4833-88dc-27506e8661b1",
+                            ConcurrencyStamp = "3d0b139c-00ad-4431-9b3f-76510d9b93ca",
                             Email = "thhiens2th@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEMzo9JtxuW1H0Kb2Kv9eja0RDDH+slbAZcgNqZNH4m+APsdwHFSsXlbpjIkbJT4kVw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENcxRFxDgFuQ7FDoIrBf1Q+tUChfQ78k2mmvuYWE0RcRzpIAN9HyM6X6iQpnP4fFNw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7cde9ad6-2230-484a-9f95-079cbec32abb",
+                            SecurityStamp = "55a4b93c-4352-4e04-ac9a-52a7e05bf44b",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "lnQms4w6YPt3gnxuKr1WMA_Y1BhaD2ew"
+                            WalletKey = "d2ElH0JD7ESpO5Wqk45XwwfgUCujJgfI"
                         });
                 });
 

@@ -11,5 +11,6 @@
         public string ApiLink { get; set; }
         public string Token { get; set; }
 
+
     }
 }
