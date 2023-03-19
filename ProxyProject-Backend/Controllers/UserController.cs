@@ -5,6 +5,7 @@ using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
+using ProxyProject_Backend.Models.ResponseModels;
 using ProxyProject_Backend.Services.Interface;
 using System.Linq.Expressions;
 
@@ -294,6 +295,52 @@ namespace ProxyProject_Backend.Controllers
                 {
                     Status = "Success",
                     Message = "Delete user successfully!"
+                });
+            }
+
+            return BadRequest("User not found");
+        }
+
+        [HttpPatch]
+        [Route("DepositMoneyForUser")]
+        [Authorize(Roles = UserRolesConstant.Admin)]
+        public async Task<IActionResult> DepositMoneyForUser(DepositMoneyForUserModel model)
+        {
+            var user = await GetCurrentUser();
+
+            if (user != null)
+            {
+                user.Balance += model.Amount;
+                user.TotalDeposited += model.Amount;
+
+                _unitOfWork.UserRepository.Update(user);
+
+                // Update wallet history
+                await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                {
+                    UserId = user.Id,
+                    Value = model.Amount,
+                    CreatedDate = DateTime.UtcNow,
+                    Note = $"Admin nap tien cho user"
+                });
+
+                await _unitOfWork.SaveChangesAsync();
+
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = new UserModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        APIKey = user.APIKey,
+                        WalletKey = user.WalletKey,
+                        Balance = user.Balance,
+                        TotalDeposited = user.TotalDeposited,
+                        LimitKeysToCreate = user.LimitKeysToCreate,
+                        NoOfCreatedKeys = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(p => p.UserId == user.Id)
+                    }
                 });
             }
 

@@ -1,13 +1,9 @@
-﻿using Microsoft.OpenApi.Any;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.ResponseModels;
 using ProxyProject_Backend.Services.Interface;
 using System.Globalization;
-using System.Linq;
-using System.Net.Http;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ProxyProject_Backend.Services
 {
@@ -69,6 +65,7 @@ namespace ProxyProject_Backend.Services
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "ABE98244-9B0D-AB34-A849-84961E1C1162";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             endpoint = endpoint.Replace("token", token);
+
             using (var httpClient = new HttpClient())
             {
                 var response = httpClient.GetAsync(endpoint + token).Result;
@@ -103,8 +100,7 @@ namespace ProxyProject_Backend.Services
                             var test = transactionApi
                                 .Where(x => !x.TransactionId.Equals(lastTransaction.TransactionId) && x.TransactionDate >= lastTransaction.TransactionDate).ToList();
 
-                            transactionList = momoObj.momoMsg.tranList
-                            .Where(_ => new DateTime(1970, 1, 1, 0, 0, 0, 0)
+                            transactionList = momoObj.momoMsg.tranList.Where(_ => new DateTime(1970, 1, 1, 0, 0, 0, 0)
                             .AddMilliseconds(_.clientTime ?? 0) >= transactionHistory
                             .FirstOrDefault().TransactionDate
                             && !_.tranId.ToString().Equals(transactionHistory
@@ -321,9 +317,8 @@ namespace ProxyProject_Backend.Services
                                     Name = tran.transactionNumber.ToString(),
                                     BankAccount = tran.transactionNumber.ToString(),
                                     BankId = bank.Id,
-                                    BankType = "SACOMBANK",
-                                    TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0)
-                                        .AddMilliseconds(tran.activeDatetime),
+                                    BankType = "ACBBANK",
+                                    TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(tran.activeDatetime),
                                     Comment = tran.description,
                                     Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
                                     UserId = user.Id,
@@ -358,7 +353,7 @@ namespace ProxyProject_Backend.Services
                                     Name = tran.transactionNumber.ToString(),
                                     BankAccount = tran.transactionNumber.ToString(),
                                     BankId = bank.Id,
-                                    BankType = "SACOMBANK",
+                                    BankType = "ACBBANK",
                                     TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0)
                                         .AddMilliseconds(tran.activeDatetime),
                                     Comment = tran.description,

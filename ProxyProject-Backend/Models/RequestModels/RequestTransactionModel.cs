@@ -2,9 +2,9 @@
 
 namespace ProxyProject_Backend.Models.RequestModels
 {
-    public class RequestProxyModel
+    public class RequestTransactionModel
     {
-        [Required(ErrorMessage = "Proxy id is required")]
+        [Required(ErrorMessage = "Transaction id is required")]
         public Guid Id { get; set; }
     }
 }
