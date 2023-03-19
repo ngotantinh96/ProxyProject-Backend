@@ -43,6 +43,11 @@ namespace ProxyProject_Backend.DAL
                .HasForeignKey(x => x.UserId);
 
             builder.Entity<UserEntity>()
+               .HasMany(x => x.TransactionHistories)
+               .WithOne(x => x.User)
+               .HasForeignKey(x => x.UserId);
+
+            builder.Entity<UserEntity>()
                .HasMany(x => x.ProxyHistories)
                .WithOne(x => x.User)
                .HasForeignKey(x => x.UserId);
@@ -77,7 +82,7 @@ namespace ProxyProject_Backend.DAL
                 TwoFactorEnabled = true,
                 LimitKeysToCreate = int.Parse(_configuration["AdminAccount:LimitKeysToCreate"]),
                 PasswordHash = hasher.HashPassword(null, _configuration["AdminAccount:Password"]),
-                
+
             });
 
             builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
@@ -86,8 +91,8 @@ namespace ProxyProject_Backend.DAL
                 RoleId = "fb2ec114-eb3c-499d-ab9d-ab8cb579c329"
             });
 
-            builder.Entity<ProxyKeyPlansEntity>().HasData(new ProxyKeyPlansEntity 
-            { 
+            builder.Entity<ProxyKeyPlansEntity>().HasData(new ProxyKeyPlansEntity
+            {
                 Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
                 Name = "Key Vip",
                 Code = "VN",
@@ -103,6 +108,9 @@ namespace ProxyProject_Backend.DAL
         public DbSet<WalletHistoryEntity> WalletHistory { get; set; }
         public DbSet<BankAccountEntity> BankAccounts { get; set; }
         public DbSet<NotificationEntity> Notifications { get; set; }
+        public DbSet<TransactionHistoryEntity> TransactionHistories { get; set; }
+
+
         public DbSet<ProxyHistoryEntity> ProxyHistory { get; set; }
     }
 }

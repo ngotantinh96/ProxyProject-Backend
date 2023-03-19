@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxyProject_Backend.DAL;
 
@@ -10,9 +11,11 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230318164014_Update-bank-account-and-add-transaction-history")]
+    partial class Updatebankaccountandaddtransactionhistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,31 +261,6 @@ namespace ProxyProject_Backend.Migrations
                     b.HasIndex("ProxyKeyPlanId");
 
                     b.ToTable("Proxy");
-                });
-
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyHistoryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<Guid>("ProxyId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("UsedTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ProxyHistory");
                 });
 
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", b =>
@@ -589,15 +567,6 @@ namespace ProxyProject_Backend.Migrations
                     b.Navigation("ProxyKeyPlan");
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyHistoryEntity", b =>
-                {
-                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
-                        .WithMany("ProxyHistories")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeysEntity", b =>
                 {
                     b.HasOne("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", "ProxyKeyPlan")
@@ -642,8 +611,6 @@ namespace ProxyProject_Backend.Migrations
 
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.UserEntity", b =>
                 {
-                    b.Navigation("ProxyHistories");
-
                     b.Navigation("ProxyKeys");
 
                     b.Navigation("TransactionHistories");

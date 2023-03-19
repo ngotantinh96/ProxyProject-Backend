@@ -1,6 +1,11 @@
+using Hangfire;
+using Hangfire.Logging;
+using Hangfire.MySql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -34,12 +39,22 @@ namespace ProxyProject_Backend
                     builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                 });
             });
+            builder.Services.AddHangfire(configuration =>
+                configuration.UseStorage(
+                    new MySqlStorage(connectionString,
+                        new MySqlStorageOptions
+                        {
+                            TablesPrefix = "Hangfire"
+                        }
+                    )));
+
+            builder.Services.AddHangfireServer();
             builder.Services.AddDbContext<ApplicationDbContext>(
                 dbContextOptions => dbContextOptions
                     .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
                     // The following three options help with debugging, but should
                     // be changed or removed for production.
-                    .LogTo(Console.WriteLine, LogLevel.Information)
+                    .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors()
             );
@@ -117,6 +132,7 @@ namespace ProxyProject_Backend
             // Repositories
 
             //Services
+            builder.Services.AddScoped<ISpayment, Spayment>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProxyKeyService, ProxyKeyService>();
@@ -136,11 +152,20 @@ namespace ProxyProject_Backend
                Path.Combine(builder.Environment.ContentRootPath, "wwwroot/BankLogo")),
                 RequestPath = "/BankLogo"
             });
-
             app.UseCors();
             app.UseAuthorization();
             app.MapControllers();
-
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions()
+            {
+                DashboardTitle = "Hangfire Dashboard",
+                //Authorization = new[]{
+                //new HangfireCustomBasicAuthenticationFilter{
+                //    User = Configuration.GetSection("HangfireCredentials:UserName").Value,
+                //    Pass = Configuration.GetSection("HangfireCredentials:Password").Value
+                //}
+            });
+            app.MapHangfireDashboard();
+            RecurringJob.AddOrUpdate<Spayment>(x => x.SyncRecords(), Cron.Minutely);
             app.Run();
         }
     }
