@@ -533,21 +533,21 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "qy96BHhg6zCi_X4HXacJF1GTxFj05SF2",
+                            APIKey = "R6WSqeN-oWpp1jJWKWB_v-nDn-7xs2Sg",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "3598010d-0193-49d1-aa59-5b843df8cc7f",
-                            Email = "thhiens2th@gmail.com",
+                            ConcurrencyStamp = "3167eae0-570e-41a9-9137-10d9c9fff90e",
+                            Email = "lovenco0410@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEIqJb0W4qZC5BmgwQEtkc0pqEVwNBNFPoh2lth2PXd8svKwhGLvm+H9npvzKbvCK8A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFa2Pu6YPMa0gP2TzDeFJB48Z7/u1YfsuLLsKmPrpi+xSjUcGyodn7Izr6GHLio0eA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "90e81ec3-36be-4ea6-9bd5-5ad024f5ea2f",
+                            SecurityStamp = "375b9dca-13d8-4495-9089-c00d1d6d26d1",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "WM35mAvSY3gRewCvDGWHqLwbL0D68LO3"
+                            WalletKey = "24_X-hZexGFANLsiXlHCI2t_EW5Voobp"
                         });
                 });
 

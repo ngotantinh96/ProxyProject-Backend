@@ -11,8 +11,8 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230318164014_Update-bank-account-and-add-transaction-history")]
-    partial class Updatebankaccountandaddtransactionhistory
+    [Migration("20230320025353_Initial-table")]
+    partial class Initialtable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -192,6 +192,12 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<string>("BankName")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -215,6 +221,9 @@ namespace ProxyProject_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
@@ -237,6 +246,12 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("EndUsingTime")
                         .HasColumnType("datetime(6)");
@@ -263,6 +278,37 @@ namespace ProxyProject_Backend.Migrations
                     b.ToTable("Proxy");
                 });
 
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyHistoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid>("ProxyId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("UsedTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ProxyHistory");
+                });
+
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -271,6 +317,12 @@ namespace ProxyProject_Backend.Migrations
 
                     b.Property<string>("Code")
                         .HasColumnType("longtext");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
@@ -296,6 +348,7 @@ namespace ProxyProject_Backend.Migrations
                         {
                             Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
                             Code = "VN",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội",
                             IsDeleted = false,
                             Name = "Key Vip",
@@ -309,6 +362,12 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("EndUsingTime")
                         .HasColumnType("datetime(6)");
@@ -343,17 +402,32 @@ namespace ProxyProject_Backend.Migrations
                     b.ToTable("ProxyKeys");
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.TransactionHistory", b =>
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.TransactionHistoryEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
                     b.Property<string>("BankAccount")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("BankId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("BankType")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Comment")
                         .HasColumnType("longtext");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
@@ -366,6 +440,9 @@ namespace ProxyProject_Backend.Migrations
 
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
@@ -459,21 +536,21 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "g9S-5C9GDWSMEOPQs6NtVmBlLp8GFNcH",
+                            APIKey = "R6WSqeN-oWpp1jJWKWB_v-nDn-7xs2Sg",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "603eac07-87af-4829-9b85-e0dc283c0b47",
-                            Email = "thhiens2th@gmail.com",
+                            ConcurrencyStamp = "3167eae0-570e-41a9-9137-10d9c9fff90e",
+                            Email = "lovenco0410@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEFEyNjOWatwQbwI6q8uQ6lL1C733Y49Q5EI+XB21aYacYRIDZfxVuLUCQyfNVz5PeA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFa2Pu6YPMa0gP2TzDeFJB48Z7/u1YfsuLLsKmPrpi+xSjUcGyodn7Izr6GHLio0eA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8e1ecec4-6db9-4ebd-ba02-1fc1031b8bdd",
+                            SecurityStamp = "375b9dca-13d8-4495-9089-c00d1d6d26d1",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "C9JG3YBz5BPzOHiDe9D61yeYW3qS9A4J"
+                            WalletKey = "24_X-hZexGFANLsiXlHCI2t_EW5Voobp"
                         });
                 });
 
@@ -482,6 +559,9 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
@@ -567,6 +647,15 @@ namespace ProxyProject_Backend.Migrations
                     b.Navigation("ProxyKeyPlan");
                 });
 
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyHistoryEntity", b =>
+                {
+                    b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
+                        .WithMany("ProxyHistories")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.ProxyKeysEntity", b =>
                 {
                     b.HasOne("ProxyProject_Backend.DAL.Entities.ProxyKeyPlansEntity", "ProxyKeyPlan")
@@ -584,7 +673,7 @@ namespace ProxyProject_Backend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.TransactionHistory", b =>
+            modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.TransactionHistoryEntity", b =>
                 {
                     b.HasOne("ProxyProject_Backend.DAL.Entities.UserEntity", "User")
                         .WithMany("TransactionHistories")
@@ -611,6 +700,8 @@ namespace ProxyProject_Backend.Migrations
 
             modelBuilder.Entity("ProxyProject_Backend.DAL.Entities.UserEntity", b =>
                 {
+                    b.Navigation("ProxyHistories");
+
                     b.Navigation("ProxyKeys");
 
                     b.Navigation("TransactionHistories");

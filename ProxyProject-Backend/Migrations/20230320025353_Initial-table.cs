@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProxyProject_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class intialdb : Migration
+    public partial class Initialtable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -89,10 +89,19 @@ namespace ProxyProject_Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     AccountNumber = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    ApiLink = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Password = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     BankLogo = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Token = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     IsMaintainance = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -109,7 +118,9 @@ namespace ProxyProject_Backend.Migrations
                     NotificationType = table.Column<int>(type: "int", nullable: false),
                     Message = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -131,7 +142,10 @@ namespace ProxyProject_Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -267,17 +281,81 @@ namespace ProxyProject_Backend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ProxyHistory",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ProxyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UsedTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProxyHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProxyHistory_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "TransactionHistories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Name = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TransactionId = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BankId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    BankAccount = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Comment = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TransactionDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    BankType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransactionHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TransactionHistories_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "WalletHistory",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Value = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     Note = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -302,7 +380,10 @@ namespace ProxyProject_Backend.Migrations
                     UsingByKey = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ProxyKeyPlanId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -331,7 +412,10 @@ namespace ProxyProject_Backend.Migrations
                     ProxyKeyPlanId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -362,12 +446,12 @@ namespace ProxyProject_Backend.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "APIKey", "AccessFailedCount", "Balance", "ConcurrencyStamp", "Email", "EmailConfirmed", "LimitKeysToCreate", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TotalDeposited", "TwoFactorEnabled", "UserName", "WalletKey" },
-                values: new object[] { "03a35a7f-e8f9-4856-adb3-f7e548dce6b7", "bxy296yegSBn9U0Ih-hCjRf6b4rGsG8x", 0, 0m, "cb0004f7-2701-417c-a8ba-7c448f137bdd", "thhiens2th@gmail.com", false, 1000000, false, null, null, null, "AQAAAAIAAYagAAAAEIrw9+yLJgAVImi47QWgj7OikbHuY7OBFRSPxOn3ENtdPbWFoUfAzIzKHUZc2wK6+g==", null, false, "359326af-6f57-43fb-bbee-21fa88f1b3e4", 0m, true, "admin", "eWL0sCsJAVK6CZYCz5JoxU9mxllNuegl" });
+                values: new object[] { "03a35a7f-e8f9-4856-adb3-f7e548dce6b7", "R6WSqeN-oWpp1jJWKWB_v-nDn-7xs2Sg", 0, 0m, "3167eae0-570e-41a9-9137-10d9c9fff90e", "lovenco0410@gmail.com", false, 1000000, false, null, null, null, "AQAAAAIAAYagAAAAEFa2Pu6YPMa0gP2TzDeFJB48Z7/u1YfsuLLsKmPrpi+xSjUcGyodn7Izr6GHLio0eA==", null, false, "375b9dca-13d8-4495-9089-c00d1d6d26d1", 0m, true, "admin", "24_X-hZexGFANLsiXlHCI2t_EW5Voobp" });
 
             migrationBuilder.InsertData(
                 table: "ProxyKeyPlans",
-                columns: new[] { "Id", "Code", "Description", "IsDeleted", "Name", "Price", "PriceUnit" },
-                values: new object[] { new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"), "VN", "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội", false, "Key Vip", 16000m, "đ/key/ngày" });
+                columns: new[] { "Id", "Code", "CreatedBy", "CreatedDate", "Description", "IsDeleted", "Name", "Price", "PriceUnit" },
+                values: new object[] { new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"), "VN", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội", false, "Key Vip", 16000m, "đ/key/ngày" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
@@ -417,6 +501,11 @@ namespace ProxyProject_Backend.Migrations
                 column: "ProxyKeyPlanId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProxyHistory_UserId",
+                table: "ProxyHistory",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProxyKeys_ProxyKeyPlanId",
                 table: "ProxyKeys",
                 column: "ProxyKeyPlanId");
@@ -424,6 +513,11 @@ namespace ProxyProject_Backend.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ProxyKeys_UserId",
                 table: "ProxyKeys",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TransactionHistories_UserId",
+                table: "TransactionHistories",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -460,7 +554,13 @@ namespace ProxyProject_Backend.Migrations
                 name: "Proxy");
 
             migrationBuilder.DropTable(
+                name: "ProxyHistory");
+
+            migrationBuilder.DropTable(
                 name: "ProxyKeys");
+
+            migrationBuilder.DropTable(
+                name: "TransactionHistories");
 
             migrationBuilder.DropTable(
                 name: "WalletHistory");
