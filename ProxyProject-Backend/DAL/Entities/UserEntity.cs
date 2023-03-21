@@ -12,7 +12,7 @@ namespace ProxyProject_Backend.DAL.Entities
 
         public virtual List<ProxyKeysEntity> ProxyKeys { get; set; }
         public virtual List<WalletHistoryEntity> WalletHistories { get; set; }
-        public virtual ICollection<TransactionHistoryEntity> TransactionHistories { get; set; }
+        public virtual List<TransactionHistoryEntity> TransactionHistories { get; set; }
         public virtual List<ProxyHistoryEntity> ProxyHistories { get; set; }
     }
 

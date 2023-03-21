@@ -75,15 +75,17 @@ namespace ProxyProject_Backend.DAL
             {
                 Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
                 Email = _configuration["AdminAccount:Email"],
+                NormalizedEmail = _configuration["AdminAccount:Email"].ToUpper(),
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = _configuration["AdminAccount:UserName"],
+                NormalizedUserName = _configuration["AdminAccount:UserName"].ToUpper(),
                 APIKey = StringUtils.GenerateSecureKey(),
                 WalletKey = StringUtils.GenerateSecureKey(),
                 TwoFactorEnabled = true,
                 LimitKeysToCreate = int.Parse(_configuration["AdminAccount:LimitKeysToCreate"]),
                 PasswordHash = hasher.HashPassword(null, _configuration["AdminAccount:Password"]),
 
-            });
+            });;
 
             builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
             {

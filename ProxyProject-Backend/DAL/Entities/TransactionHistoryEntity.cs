@@ -22,6 +22,5 @@ namespace ProxyProject_Backend.DAL.Entities
     {
        SUCCESS = 1,
        FAIL = 0
-
     }
 }
