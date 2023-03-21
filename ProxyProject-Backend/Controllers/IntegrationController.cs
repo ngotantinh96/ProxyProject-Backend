@@ -40,7 +40,7 @@ namespace ProxyProject_Backend.Controllers
                 {
                     var proxyHistories = await _unitOfWork.ProxyHistoryRepository.GetAsync(x => x.UserId == user.Id && x.UsedTime.Date == DateTime.UtcNow.Date);
                     var proxyKey = proxyKeys.FirstOrDefault();
-                    var proxies = await _unitOfWork.ProxyRepository.GetAsync(x => x.ProxyKeyPlanId == proxyKey.ProxyKeyPlanId 
+                    var proxies = await _unitOfWork.ProxyRepository.GetAsync(x => x.ProxyKeyPlanId == proxyKey.ProxyKeyPlanId
                         && !proxyHistories.Select(x => x.ProxyId).Any(p => p == x.Id)
                         && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "", 0, 1);
 
@@ -68,7 +68,7 @@ namespace ProxyProject_Backend.Controllers
 
                         _unitOfWork.ProxyRepository.Update(proxy);
 
-                        await _unitOfWork.SaveChangesAsync(); 
+                        await _unitOfWork.SaveChangesAsync();
 
                         return Ok(new IntegrationResponseModel
                         {
@@ -114,7 +114,7 @@ namespace ProxyProject_Backend.Controllers
             if (proxy != null)
             {
                 var proxyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(proxy.ProxyKeyPlanId);
-                
+
                 return Ok(new IntegrationResponseModel
                 {
                     Success = true,
@@ -171,7 +171,7 @@ namespace ProxyProject_Backend.Controllers
 
             if (proxyKeyInfo != null)
             {
-                if(proxyKeyInfo.ExpireDate <= DateTime.UtcNow)
+                if (proxyKeyInfo.ExpireDate <= DateTime.UtcNow)
                 {
                     _unitOfWork.ProxyKeysRepository.Delete(proxyKeyInfo.Id);
                     await _unitOfWork.SaveChangesAsync();
@@ -287,13 +287,13 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null)
             {
-                if(quantity > 0)
+                if (quantity > 0)
                 {
                     if (days > 0)
                     {
                         var proxyKeyCountry = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(countryId);
 
-                        if(proxyKeyCountry != null)
+                        if (proxyKeyCountry != null)
                         {
                             var totalOrderedAmount = quantity * days * proxyKeyCountry.Price;
 
@@ -324,7 +324,8 @@ namespace ProxyProject_Backend.Controllers
                                     _unitOfWork.UserRepository.Update(user);
 
                                     // Update wallet history
-                                    await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                                    await _unitOfWork.WalletHistoryRepository.InsertAsync(new
+                                        WalletHistoryEntity(await GetCurrentUser())
                                     {
                                         UserId = user.Id,
                                         Value = -totalOrderedAmount,
@@ -401,7 +402,7 @@ namespace ProxyProject_Backend.Controllers
             {
                 var proxyKeyInfo = await _unitOfWork.ProxyKeysRepository.GetByFilterAsync(x => x.Key == proxyKey);
 
-                if(proxyKeyInfo != null)
+                if (proxyKeyInfo != null)
                 {
                     if (days > 0)
                     {
@@ -419,7 +420,7 @@ namespace ProxyProject_Backend.Controllers
                             _unitOfWork.UserRepository.Update(user);
 
                             // Update wallet history
-                            await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                            await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity(await GetCurrentUser())
                             {
                                 UserId = user.Id,
                                 Value = -totalOrderedAmount,

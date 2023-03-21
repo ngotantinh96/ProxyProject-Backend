@@ -7,5 +7,7 @@ namespace ProxyProject_Backend.Models.RequestModels
         [Required(ErrorMessage = "Transaction id is required")]
         public Guid Id { get; set; }
         public decimal Amount { get; set; }
+        public string UserName { get; set; }
+        public string Note { get; set; }
     }
 }

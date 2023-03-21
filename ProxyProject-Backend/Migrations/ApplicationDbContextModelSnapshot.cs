@@ -189,6 +189,12 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<string>("BankName")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -212,6 +218,9 @@ namespace ProxyProject_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
@@ -234,6 +243,12 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("EndUsingTime")
                         .HasColumnType("datetime(6)");
@@ -266,6 +281,12 @@ namespace ProxyProject_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -294,6 +315,12 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
@@ -318,6 +345,7 @@ namespace ProxyProject_Backend.Migrations
                         {
                             Id = new Guid("2dfa909c-3cd6-494e-9e99-5267b64eb791"),
                             Code = "VN",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội",
                             IsDeleted = false,
                             Name = "Key Vip",
@@ -331,6 +359,12 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("EndUsingTime")
                         .HasColumnType("datetime(6)");
@@ -388,6 +422,9 @@ namespace ProxyProject_Backend.Migrations
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
@@ -496,23 +533,21 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "YbGx3gg62kQgOTnuH0z15J9X23Mdum2N",
+                            APIKey = "R6WSqeN-oWpp1jJWKWB_v-nDn-7xs2Sg",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "3f993a87-e581-4039-b65d-ff06b89f309f",
-                            Email = "thhiens2th@gmail.com",
+                            ConcurrencyStamp = "3167eae0-570e-41a9-9137-10d9c9fff90e",
+                            Email = "lovenco0410@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            NormalizedEmail = "THHIENS2TH@GMAIL.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEH4D4nUX0XF7GDXWcdH4KCFLRSmHYGHmrPZ8Nclr7q0fNPm24bcK8mAqMklPUAnC7Q==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFa2Pu6YPMa0gP2TzDeFJB48Z7/u1YfsuLLsKmPrpi+xSjUcGyodn7Izr6GHLio0eA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "fd3a5009-0750-4bc3-991b-91f30c971fb6",
+                            SecurityStamp = "375b9dca-13d8-4495-9089-c00d1d6d26d1",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "g4iuTdPdlH9QPzqT7lcJq968oqpeOUmI"
+                            WalletKey = "24_X-hZexGFANLsiXlHCI2t_EW5Voobp"
                         });
                 });
 
@@ -521,6 +556,9 @@ namespace ProxyProject_Backend.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");

@@ -69,13 +69,13 @@ namespace ProxyProject_Backend.Services
 
             using (var httpClient = new HttpClient())
             {
-                var response = httpClient.GetAsync(endpoint + token).Result;
+                var response = httpClient.GetAsync(endpoint).Result;
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var json = response.Content.ReadAsStringAsync().Result;
                     if (string.IsNullOrEmpty(json))
                     {
-                        response = httpClient.GetAsync(endpoint + token).Result;
+                        response = httpClient.GetAsync(endpoint).Result;
                         json = response.Content.ReadAsStringAsync().Result;
                     }
                     MomoType momoObj = JsonConvert.DeserializeObject<MomoType>(json);
@@ -140,7 +140,7 @@ namespace ProxyProject_Backend.Services
                                         _unitOfWork.UserRepository.Update(user);
 
                                         // Update wallet history
-                                        _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                                        _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity()
                                         {
                                             UserId = user.Id,
                                             Value = transaction.amount ?? 0,
@@ -153,20 +153,23 @@ namespace ProxyProject_Backend.Services
                                 }
                                 else
                                 {
-                                    _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
+                                    var filterTransaction = _configuration.GetSection("FilterBank").Value.ToString();
+                                    if (!transaction.comment.Contains(filterTransaction))
                                     {
-                                        TransactionId = transaction.tranId.ToString(),
-                                        Name = transaction.partnerName,
-                                        BankAccount = transaction.partnerId,
-                                        BankId = bank.Id,
-                                        BankType = "MOMO",
-                                        Amount = transaction.amount ?? 0,
-                                        TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(transaction.clientTime ?? 0),
-                                        Comment = transaction.comment,
-                                        Status = EnumTransactionStatus.FAIL,
-                                    }).GetAwaiter();
-
-                                    _unitOfWork.SaveChangesAsync().GetAwaiter().GetResult();
+                                        _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
+                                        {
+                                            TransactionId = transaction.tranId.ToString(),
+                                            Name = transaction.partnerName,
+                                            BankAccount = transaction.partnerId,
+                                            BankId = bank.Id,
+                                            BankType = "MOMO",
+                                            Amount = transaction.amount ?? 0,
+                                            TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(transaction.clientTime ?? 0),
+                                            Comment = transaction.comment,
+                                            Status = EnumTransactionStatus.FAIL,
+                                        }).GetAwaiter();
+                                        _unitOfWork.SaveChangesAsync().GetAwaiter().GetResult();
+                                    }
                                 }
                             }
                         });
@@ -181,7 +184,7 @@ namespace ProxyProject_Backend.Services
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
-            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.Decrypt(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
+            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.DecryptPassword(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
             endpoint = endpoint.Replace("password", password).Replace("token", token).Replace("sotaikhoan", bankNumber);
 
             using (var httpClient = new HttpClient())
@@ -239,7 +242,7 @@ namespace ProxyProject_Backend.Services
                                     _unitOfWork.UserRepository.Update(user);
 
                                     // Update wallet history
-                                    _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                                    _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity()
                                     {
                                         UserId = user.Id,
                                         Value = amout,
@@ -277,7 +280,7 @@ namespace ProxyProject_Backend.Services
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
-            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.Decrypt(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
+            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.DecryptPassword(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
             endpoint = endpoint.Replace("password", password).Replace("token", token).Replace("sotaikhoan", bankNumber);
 
             using (var httpClient = new HttpClient())
