@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Utils;
+using static ProxyProject_Backend.Controllers.BankAccountController;
 
 namespace ProxyProject_Backend.DAL
 {
@@ -71,27 +72,29 @@ namespace ProxyProject_Backend.DAL
 
 
             var hasher = new PasswordHasher<UserEntity>();
-            builder.Entity<UserEntity>().HasData(new UserEntity
+
+            var adminAccounts = _configuration.GetSection("AdminAccounts").Get<List<AdminAccount>>();
+
+            builder.Entity<UserEntity>().HasData(adminAccounts.Select(x => new UserEntity
             {
-                Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                Email = _configuration["AdminAccount:Email"],
-                NormalizedEmail = _configuration["AdminAccount:Email"].ToUpper(),
+                Id = x.Id,
+                Email = x.Email,
+                NormalizedEmail = x.Email.ToUpper(),
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = _configuration["AdminAccount:UserName"],
-                NormalizedUserName = _configuration["AdminAccount:UserName"].ToUpper(),
+                UserName = x.UserName,
+                NormalizedUserName = x.UserName.ToUpper(),
                 APIKey = StringUtils.GenerateSecureKey(),
                 WalletKey = StringUtils.GenerateSecureKey(),
                 TwoFactorEnabled = true,
-                LimitKeysToCreate = int.Parse(_configuration["AdminAccount:LimitKeysToCreate"]),
-                PasswordHash = hasher.HashPassword(null, _configuration["AdminAccount:Password"]),
+                LimitKeysToCreate = x.LimitKeysToCreate,
+                PasswordHash = hasher.HashPassword(null, x.Password),
+            }));
 
-            });;
-
-            builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
+            builder.Entity<IdentityUserRole<string>>().HasData(adminAccounts.Select(x => new IdentityUserRole<string>
             {
-                UserId = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
+                UserId = x.Id,
                 RoleId = "fb2ec114-eb3c-499d-ab9d-ab8cb579c329"
-            });
+            }));
 
             builder.Entity<ProxyKeyPlansEntity>().HasData(new ProxyKeyPlansEntity
             {
@@ -111,8 +114,6 @@ namespace ProxyProject_Backend.DAL
         public DbSet<BankAccountEntity> BankAccounts { get; set; }
         public DbSet<NotificationEntity> Notifications { get; set; }
         public DbSet<TransactionHistoryEntity> TransactionHistories { get; set; }
-
-
         public DbSet<ProxyHistoryEntity> ProxyHistory { get; set; }
     }
 }

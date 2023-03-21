@@ -16,6 +16,15 @@ namespace ProxyProject_Backend.DAL.Entities
         public virtual List<ProxyHistoryEntity> ProxyHistories { get; set; }
     }
 
+    public class AdminAccount
+    {
+        public string Id { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public int LimitKeysToCreate { get; set; }
+    }
+
     public static class UserRolesConstant
     {
         public const string Admin = "Admin";
