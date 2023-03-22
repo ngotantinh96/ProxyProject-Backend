@@ -32,4 +32,10 @@
     <Folder Include="wwwroot\BankLogo\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\BankLogo\Agribank1678637655398.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

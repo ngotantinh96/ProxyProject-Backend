@@ -11,8 +11,8 @@ using ProxyProject_Backend.DAL;
 namespace ProxyProject_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230320025353_Initial-table")]
-    partial class Initialtable
+    [Migration("20230321102117_initialDB")]
+    partial class initialDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -536,21 +536,23 @@ namespace ProxyProject_Backend.Migrations
                         new
                         {
                             Id = "03a35a7f-e8f9-4856-adb3-f7e548dce6b7",
-                            APIKey = "R6WSqeN-oWpp1jJWKWB_v-nDn-7xs2Sg",
+                            APIKey = "H04ELbTYNkHVsM8toyO67eW3la2TXcHg",
                             AccessFailedCount = 0,
                             Balance = 0m,
-                            ConcurrencyStamp = "3167eae0-570e-41a9-9137-10d9c9fff90e",
-                            Email = "lovenco0410@gmail.com",
+                            ConcurrencyStamp = "b9a6d0b7-ebb6-463f-b90e-ac5519e699e0",
+                            Email = "thhiens2th@gmail.com",
                             EmailConfirmed = false,
                             LimitKeysToCreate = 1000000,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAIAAYagAAAAEFa2Pu6YPMa0gP2TzDeFJB48Z7/u1YfsuLLsKmPrpi+xSjUcGyodn7Izr6GHLio0eA==",
+                            NormalizedEmail = "THHIENS2TH@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAEE/XCex8sJKkH8E217dbHBWjHEc1xY997HZGClJNv6M0KQU0DM6UgU2mb+n+M5PHrA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "375b9dca-13d8-4495-9089-c00d1d6d26d1",
+                            SecurityStamp = "659783d3-51e3-473f-8e6b-cb8d42ddbc53",
                             TotalDeposited = 0m,
                             TwoFactorEnabled = true,
                             UserName = "admin",
-                            WalletKey = "24_X-hZexGFANLsiXlHCI2t_EW5Voobp"
+                            WalletKey = "xZDq_nELMf9FfTrc_3H8_-IM597My6Gw"
                         });
                 });
 

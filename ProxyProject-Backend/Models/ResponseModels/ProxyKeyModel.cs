@@ -10,6 +10,7 @@
         public DateTime ExpireDate { get; set; }
         public EnumStatusKey Status { get; set; }
         public string Note { get; set; }
+        public bool IsInUse { get; set; }
     }
 
     public enum EnumStatusKey

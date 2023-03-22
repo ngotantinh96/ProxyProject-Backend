@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProxyProject_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class Initialtable : Migration
+    public partial class initialDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -446,7 +446,7 @@ namespace ProxyProject_Backend.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "APIKey", "AccessFailedCount", "Balance", "ConcurrencyStamp", "Email", "EmailConfirmed", "LimitKeysToCreate", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TotalDeposited", "TwoFactorEnabled", "UserName", "WalletKey" },
-                values: new object[] { "03a35a7f-e8f9-4856-adb3-f7e548dce6b7", "R6WSqeN-oWpp1jJWKWB_v-nDn-7xs2Sg", 0, 0m, "3167eae0-570e-41a9-9137-10d9c9fff90e", "lovenco0410@gmail.com", false, 1000000, false, null, null, null, "AQAAAAIAAYagAAAAEFa2Pu6YPMa0gP2TzDeFJB48Z7/u1YfsuLLsKmPrpi+xSjUcGyodn7Izr6GHLio0eA==", null, false, "375b9dca-13d8-4495-9089-c00d1d6d26d1", 0m, true, "admin", "24_X-hZexGFANLsiXlHCI2t_EW5Voobp" });
+                values: new object[] { "03a35a7f-e8f9-4856-adb3-f7e548dce6b7", "H04ELbTYNkHVsM8toyO67eW3la2TXcHg", 0, 0m, "b9a6d0b7-ebb6-463f-b90e-ac5519e699e0", "thhiens2th@gmail.com", false, 1000000, false, null, "THHIENS2TH@GMAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEE/XCex8sJKkH8E217dbHBWjHEc1xY997HZGClJNv6M0KQU0DM6UgU2mb+n+M5PHrA==", null, false, "659783d3-51e3-473f-8e6b-cb8d42ddbc53", 0m, true, "admin", "xZDq_nELMf9FfTrc_3H8_-IM597My6Gw" });
 
             migrationBuilder.InsertData(
                 table: "ProxyKeyPlans",

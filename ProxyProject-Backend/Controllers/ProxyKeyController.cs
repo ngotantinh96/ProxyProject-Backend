@@ -124,45 +124,45 @@ namespace ProxyProject_Backend.Controllers
             if (user != null)
             {
                 var proxyKeys = await _unitOfWork.ProxyKeysRepository
-                    .GetAsync(x => x.UserId == user.Id && model.Keys.Contains(x.Key), null, "ProxyKeyPlan");
+                    .GetAsync(x => x.UserId == user.Id && model.Keys.Any(key => key.Key.Contains(x.Key)), null, "ProxyKeyPlan");
 
-                if (proxyKeys.Any())
-                {
-                    var totalOrderedAmount = proxyKeys.Sum(x => x.ProxyKeyPlan.Price * model.NoOfDates);
+                //if (proxyKeys.Any())
+                //{
+                //    var totalOrderedAmount = proxyKeys.Sum(x => x.ProxyKeyPlan.Price * model.NoOfDates);
 
-                    if (totalOrderedAmount <= user.Balance)
-                    {
-                        // Perform orders
-                        foreach (var proxyKey in proxyKeys)
-                        {
-                            proxyKey.ExpireDate = proxyKey.ExpireDate.AddDays(model.NoOfDates);
-                        }
+                //    if (totalOrderedAmount <= user.Balance)
+                //    {
+                //        // Perform orders
+                //        foreach (var proxyKey in proxyKeys)
+                //        {
+                //            proxyKey.ExpireDate = proxyKey.ExpireDate.AddDays(model.NoOfDates);
+                //        }
 
-                        _unitOfWork.ProxyKeysRepository.UpdateList(proxyKeys);
+                //        _unitOfWork.ProxyKeysRepository.UpdateList(proxyKeys);
 
-                        // Update user balance
-                        user.Balance -= totalOrderedAmount;
-                        _unitOfWork.UserRepository.Update(user);
+                //        // Update user balance
+                //        user.Balance -= totalOrderedAmount;
+                //        _unitOfWork.UserRepository.Update(user);
 
-                        // Update wallet history
-                        await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
-                        {
-                            UserId = user.Id,
-                            Value = -totalOrderedAmount,
-                            CreatedDate = DateTime.UtcNow,
-                            Note = $"Gia han {proxyKeys.Count()} keys - {model.NoOfDates} ngay."
-                        });
+                //        // Update wallet history
+                //        await _unitOfWork.WalletHistoryRepository.InsertAsync(new WalletHistoryEntity
+                //        {
+                //            UserId = user.Id,
+                //            Value = -totalOrderedAmount,
+                //            CreatedDate = DateTime.UtcNow,
+                //            Note = $"Gia han {proxyKeys.Count()} keys - {model.NoOfDates} ngay."
+                //        });
 
-                        await _unitOfWork.SaveChangesAsync();
+                //        await _unitOfWork.SaveChangesAsync();
 
-                        return Ok(new ResponseModel
-                        {
-                            Status = "Success",
-                            Data = model.Keys
-                        });
-                    }
-                    return BadRequest("Balance is not enough");
-                }
+                //        return Ok(new ResponseModel
+                //        {
+                //            Status = "Success",
+                //            Data = model.Keys
+                //        });
+                //    }
+                //    return BadRequest("Balance is not enough");
+                //}
 
                 return BadRequest("Keys not found");
             }
@@ -257,6 +257,8 @@ namespace ProxyProject_Backend.Controllers
                     .GetAsync(filterKeyWord,
                     x => x.OrderByDescending(p => p.ExpireDate), "ProxyKeyPlan", model.PageIndex, model.PageSize);
 
+                var a = purchasedProxyKeys.Where(x => x.ExpireDate < DateTime.UtcNow);
+
                 return Ok(new ResponseModel
                 {
                     Status = "Success",
@@ -269,7 +271,8 @@ namespace ProxyProject_Backend.Controllers
                         ProxyKey = x.Key,
                         ExpireDate = x.ExpireDate,
                         Status = x.ExpireDate > DateTime.UtcNow ? EnumStatusKey.WORKING : EnumStatusKey.EXPIRED,
-                        Note = x.Note
+                        Note = x.Note,
+                        IsInUse = x.EndUsingTime < DateTime.UtcNow, // Đang sử dụng :  x.EndUsingTime < DateTime.UtcNow  có value/ Đã sử dụng: Starttime có value
                     }),
                     Total = await _unitOfWork.ProxyKeysRepository.CountByFilterAsync(x => x.UserId == user.Id)
                 });

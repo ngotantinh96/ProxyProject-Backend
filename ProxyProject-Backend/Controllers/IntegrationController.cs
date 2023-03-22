@@ -33,54 +33,64 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null)
             {
+                var a = await _unitOfWork.ProxyKeysRepository.GetAsync(x => x.UserId == user.Id);
                 var proxyKeys = await _unitOfWork.ProxyKeysRepository.GetAsync(x => x.UserId == user.Id && x.ExpireDate > DateTime.UtcNow
-                    && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "ProxyKeyPlan", 0, 1);
-
+                    && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "ProxyKeyPlan", 0, 0);
                 if (proxyKeys.Any())
                 {
+                    IntegrationProxyModel integrationResponse = null;
                     var proxyHistories = await _unitOfWork.ProxyHistoryRepository.GetAsync(x => x.UserId == user.Id && x.UsedTime.Date == DateTime.UtcNow.Date);
-                    var proxyKey = proxyKeys.FirstOrDefault();
-                    var proxies = await _unitOfWork.ProxyRepository.GetAsync(x => x.ProxyKeyPlanId == proxyKey.ProxyKeyPlanId
-                        && !proxyHistories.Select(x => x.ProxyId).Any(p => p == x.Id)
-                        && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "", 0, 1);
-
-                    if (proxies.Any())
+                    foreach (var proxyKey in proxyKeys)
                     {
-                        var proxyChangeTime = double.Parse(_configuration["ProxyChangeTime"]);
+                        var proxies = await _unitOfWork.ProxyRepository.GetAsync(x => x.ProxyKeyPlanId == proxyKey.ProxyKeyPlanId
+                            && !proxyHistories.Select(x => x.ProxyId).Any(p => p == x.Id)
+                            && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "", 0, 1);
 
-                        var startUsingTime = DateTime.UtcNow;
-                        var endUsingTime = startUsingTime.AddSeconds(proxyChangeTime);
-                        proxyKey.StartUsingTime = startUsingTime;
-                        proxyKey.EndUsingTime = endUsingTime;
-                        _unitOfWork.ProxyKeysRepository.Update(proxyKey);
-
-                        var proxy = proxies.FirstOrDefault();
-                        proxy.StartUsingTime = startUsingTime;
-                        proxy.EndUsingTime = endUsingTime;
-                        proxy.UsingByKey = proxyKey.Key;
-
-                        await _unitOfWork.ProxyHistoryRepository.InsertAsync(new ProxyHistoryEntity
+                        if (proxies.Any())
                         {
-                            ProxyId = proxy.Id,
-                            UsedTime = DateTime.UtcNow,
-                            UserId = user.Id
-                        });
+                            var proxyChangeTime = double.Parse(_configuration["ProxyChangeTime"]);
 
-                        _unitOfWork.ProxyRepository.Update(proxy);
+                            var startUsingTime = DateTime.UtcNow;
+                            var endUsingTime = startUsingTime.AddSeconds(proxyChangeTime);
+                            proxyKey.StartUsingTime = startUsingTime;
+                            proxyKey.EndUsingTime = endUsingTime;
+                            _unitOfWork.ProxyKeysRepository.Update(proxyKey);
 
-                        await _unitOfWork.SaveChangesAsync();
+                            var proxy = proxies.FirstOrDefault();
+                            proxy.StartUsingTime = startUsingTime;
+                            proxy.EndUsingTime = endUsingTime;
+                            proxy.UsingByKey = proxyKey.Key;
 
-                        return Ok(new IntegrationResponseModel
-                        {
-                            Success = true,
-                            Description = string.Empty,
-                            Data = new IntegrationProxyModel
+                            await _unitOfWork.ProxyHistoryRepository.InsertAsync(new ProxyHistoryEntity
+                            {
+                                ProxyId = proxy.Id,
+                                UsedTime = DateTime.UtcNow,
+                                UserId = user.Id
+                            });
+
+                            _unitOfWork.ProxyRepository.Update(proxy);
+
+                            await _unitOfWork.SaveChangesAsync();
+
+                            integrationResponse = new IntegrationProxyModel
                             {
                                 Proxy = proxy.Proxy,
                                 Country = proxyKey.ProxyKeyPlan.Name,
                                 NextChange = proxyChangeTime,
                                 Timeout = proxyChangeTime
-                            }
+                            };
+
+                            break;
+                        }
+                    }
+
+                    if(integrationResponse != null)
+                    {
+                        return Ok(new IntegrationResponseModel
+                        {
+                            Success = true,
+                            Description = string.Empty,
+                            Data = integrationResponse
                         });
                     }
 
@@ -110,6 +120,7 @@ namespace ProxyProject_Backend.Controllers
         public async Task<IActionResult> GetProxy(string proxyKey)
         {
             var proxy = await _unitOfWork.ProxyRepository.GetByFilterAsync(x => x.UsingByKey == proxyKey);
+            var a = await _unitOfWork.ProxyRepository.GetAsync();
 
             if (proxy != null)
             {
