@@ -5,7 +5,6 @@ using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
-using ProxyProject_Backend.Models.ResponseModels;
 using ProxyProject_Backend.Services.Interface;
 using System.Linq.Expressions;
 
@@ -251,7 +250,7 @@ namespace ProxyProject_Backend.Controllers
                 user.UserName = model.UserName;
                 user.Email = model.Email;
 
-                if(model.LimitKeysToCreate > 0)
+                if (model.LimitKeysToCreate > 0)
                 {
                     user.LimitKeysToCreate = model.LimitKeysToCreate;
                 }
@@ -286,7 +285,7 @@ namespace ProxyProject_Backend.Controllers
         public async Task<IActionResult> DeleteUser([FromBody] DeleteUserModel model)
         {
             var list = await _unitOfWork.UserRepository.GetAsync(x => model.Ids.Contains(x.Id));
-            if (list != null && list.Count> 0)
+            if (list != null && list.Count > 0)
             {
                 _unitOfWork.UserRepository.DeleteList(list);
                 await _unitOfWork.SaveChangesAsync();

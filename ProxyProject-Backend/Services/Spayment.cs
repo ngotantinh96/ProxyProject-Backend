@@ -111,12 +111,12 @@ namespace ProxyProject_Backend.Services
                         // Save DB
                         transactionList.ForEach(transaction =>
                         {
-                            if(_unitOfWork.TransactionHistoryRepository.GetByFilterAsync(x => x.TransactionId == transaction.tranId.ToString()).Result == null)
+                            if (_unitOfWork.TransactionHistoryRepository.GetByFilterAsync(x => x.TransactionId == transaction.tranId.ToString()).Result == null)
                             {
-                                if (!string.IsNullOrWhiteSpace(transaction.comment) && Guid.TryParse(transaction.comment?.Trim(), out Guid userId))
-                                {
-                                    var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.Id == userId.ToString()).Result;
+                                var user = ConvertTransactionCommentToUser(transaction.comment);
 
+                                if (user != null)
+                                {
                                     _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                     {
                                         TransactionId = transaction.tranId.ToString(),
@@ -124,7 +124,7 @@ namespace ProxyProject_Backend.Services
                                         BankAccount = transaction.partnerId,
                                         Amount = transaction.amount ?? 0,
                                         BankId = bank.Id,
-                                        BankType ="MOMO",
+                                        BankType = "MOMO",
                                         TransactionDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddMilliseconds(transaction.clientTime ?? 0),
                                         Comment = transaction.comment,
                                         Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
@@ -178,13 +178,20 @@ namespace ProxyProject_Backend.Services
             }
 
         }
+
+        private UserEntity ConvertTransactionCommentToUser(string comment)
+        {
+            return !string.IsNullOrWhiteSpace(comment)
+                   ? _unitOfWork.UserRepository.GetByFilterAsync(x => string.Equals(x.UserName, comment.Trim(), StringComparison.OrdinalIgnoreCase)).Result
+                   : null;
+        }
         private void GetVCBBank(BankAccountEntity bank, List<TransactionHistoryEntity> transactionHistory)
         {
             string endpoint = !string.IsNullOrWhiteSpace(bank.ApiLink) ? bank.ApiLink : "https://api.spayment.vn/historyapivcb/password/sotaikhoan/token";
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
-            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.DecryptPassword(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
+            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.Decrypt(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
             endpoint = endpoint.Replace("password", password).Replace("token", token).Replace("sotaikhoan", bankNumber);
 
             using (var httpClient = new HttpClient())
@@ -215,10 +222,10 @@ namespace ProxyProject_Backend.Services
                         // Save DB
                         transactionList.ForEach(transaction =>
                         {
-                            if (!string.IsNullOrWhiteSpace(transaction.MoTa) && Guid.TryParse(transaction.MoTa?.Trim(), out Guid userId))
-                            {
-                                var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.Id == userId.ToString()).Result;
+                            var user = ConvertTransactionCommentToUser(transaction.MoTa);
 
+                            if (user != null)
+                            {
                                 _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                 {
                                     TransactionId = transaction.SoThamChieu,
@@ -280,7 +287,7 @@ namespace ProxyProject_Backend.Services
             string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
-            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.DecryptPassword(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
+            string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.Decrypt(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
             endpoint = endpoint.Replace("password", password).Replace("token", token).Replace("sotaikhoan", bankNumber);
 
             using (var httpClient = new HttpClient())
@@ -311,10 +318,10 @@ namespace ProxyProject_Backend.Services
                         // Save DB
                         transactionList.ForEach(transaction =>
                         {
-                            if (!string.IsNullOrWhiteSpace(transaction.description) && Guid.TryParse(transaction.description?.Trim(), out Guid userId))
-                            {
-                                var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.Id == userId.ToString()).Result;
+                            var user = ConvertTransactionCommentToUser(transaction.description);
 
+                            if (user != null)
+                            {
                                 _unitOfWork.TransactionHistoryRepository.InsertAsync(new TransactionHistoryEntity()
                                 {
                                     TransactionId = transaction.transactionNumber.ToString(),

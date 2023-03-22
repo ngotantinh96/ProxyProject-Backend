@@ -9,6 +9,7 @@ namespace ProxyProject_Backend.DAL.Entities
             this.CreatedBy = user.Id;
             this.CreatedDate = DateTime.UtcNow;
         }
+
         public WalletHistoryEntity()
         {
             this.CreatedDate = DateTime.UtcNow;

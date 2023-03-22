@@ -19,6 +19,7 @@ namespace ProxyProject_Backend.DAL
         private GenericRepository<ProxyEntity> _proxyRepository;
         private GenericRepository<ProxyHistoryEntity> _proxyHistoryRepository;
         private GenericRepository<TransactionHistoryEntity> _transactionHistoryRepository;
+        private GenericRepository<GlobalConfigurationEntity> _globalConfigurationRepository;
 
         public GenericRepository<UserEntity> UserRepository
         {
@@ -125,6 +126,18 @@ namespace ProxyProject_Backend.DAL
                     _proxyHistoryRepository = new GenericRepository<ProxyHistoryEntity>(_context);
                 }
                 return _proxyHistoryRepository;
+            }
+        }
+
+        public GenericRepository<GlobalConfigurationEntity> GlobalConfigurationRepository
+        {
+            get
+            {
+                if (_globalConfigurationRepository == null)
+                {
+                    _globalConfigurationRepository = new GenericRepository<GlobalConfigurationEntity>(_context);
+                }
+                return _globalConfigurationRepository;
             }
         }
 

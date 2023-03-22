@@ -105,6 +105,12 @@ namespace ProxyProject_Backend.DAL
                 PriceUnit = "đ/key/ngày",
                 Description = "Được quyền đổi IP sau: 2 phút, IP sống đến khi người dùng đổi IP (IP private), tốc độ vượt trội"
             });
+
+            builder.Entity<GlobalConfigurationEntity>().HasData(new GlobalConfigurationEntity
+            {
+                Id = new Guid("6bec4da2-3132-4475-934a-c33d4fa9d451"),
+                TwoFactorEnabled = true
+            });
         }
 
         public DbSet<ProxyKeyPlansEntity> ProxyKeyPlans { get; set; }
@@ -115,5 +121,6 @@ namespace ProxyProject_Backend.DAL
         public DbSet<NotificationEntity> Notifications { get; set; }
         public DbSet<TransactionHistoryEntity> TransactionHistories { get; set; }
         public DbSet<ProxyHistoryEntity> ProxyHistory { get; set; }
+        public DbSet<GlobalConfigurationEntity> GlobalConfiguration { get; set; }
     }
 }

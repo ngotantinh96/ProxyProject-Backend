@@ -80,8 +80,8 @@ namespace ProxyProject_Backend.Controllers
                         AccountName = backAccount.AccountName,
                         AccountNumber = backAccount.AccountNumber,
                         IsMaintainance = backAccount.IsMaintainance,
-                        ApiLink= backAccount.ApiLink,
-                        Token= backAccount.Token,
+                        ApiLink = backAccount.ApiLink,
+                        Token = backAccount.Token,
                     }
                 });
             }
@@ -109,7 +109,7 @@ namespace ProxyProject_Backend.Controllers
 
                     if(!string.IsNullOrWhiteSpace(model.Password))
                     {
-                        bankAccount.Password = StringUtils.EncryptPassword(model.Password, _configuration["PasswordEncryptKey"]);
+                        bankAccount.Password = StringUtils.Encrypt(model.Password, _configuration["PasswordEncryptKey"]);
                     }
 
                     await _unitOfWork.SaveChangesAsync();

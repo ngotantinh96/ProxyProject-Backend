@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
 using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
@@ -21,19 +22,21 @@ namespace ProxyProject_Backend.Controllers
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
-
+        private UnitOfWork _unitOfWork;
         public AuthenticateController(
             UserManager<UserEntity> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
             IUserService userService,
-            IEmailService emailService)
+            IEmailService emailService,
+             ApplicationDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _userService = userService;
             _emailService = emailService;
+            _unitOfWork = new UnitOfWork(context);
         }
 
         [HttpPost]
@@ -44,7 +47,13 @@ namespace ProxyProject_Backend.Controllers
 
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                if(user.TwoFactorEnabled)
+                async Task<bool> IsSystemTwoFactorEnabled()
+                {
+                    var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
+                    return globalConfiguration != null && globalConfiguration.TwoFactorEnabled;
+                };
+
+                if (user.TwoFactorEnabled && await IsSystemTwoFactorEnabled())
                 {
                     var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
                     var emailResult = await _emailService.SendMailAsync(_configuration["EmailConfig:MFASubject"], 
