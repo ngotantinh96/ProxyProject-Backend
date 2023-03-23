@@ -109,12 +109,27 @@ namespace ProxyProject_Backend.Controllers
         public async Task<IActionResult> GetProxies([FromQuery] GetListPagingModel model)
         {
             Expression<Func<ProxyEntity, bool>> filter = null;
-
+            Expression<Func<ProxyEntity, bool>> isUse = null;
             if (!string.IsNullOrWhiteSpace(model.Keyword))
-            {
-                filter = (x) => x.Proxy.Contains(model.Keyword);
+            { 
+                if (model.IsUse != null && model.IsUse > 0)
+                {
+                    if (model.IsUse == 1) filter = (x) => !string.IsNullOrWhiteSpace(x.UsingByKey) && x.Proxy.Contains(model.Keyword);
+                    else filter = (x) => string.IsNullOrWhiteSpace(x.UsingByKey) && x.Proxy.Contains(model.Keyword);
+                }
+                else
+                {
+                    filter  = (x) => x.Proxy.Contains(model.Keyword);
+                }
             }
-
+            else
+            {
+                if (model.IsUse != null && model.IsUse > 0)
+                {
+                    if (model.IsUse == 1) filter = (x) => !string.IsNullOrWhiteSpace(x.UsingByKey);
+                    else filter = (x) => string.IsNullOrWhiteSpace(x.UsingByKey);
+                }
+            }
             var notifications = await _unitOfWork.ProxyRepository
                      .GetAsync(filter, x => x.OrderBy(p => p.Proxy), "ProxyKeyPlan", model.PageIndex, model.PageSize);
 
@@ -129,7 +144,8 @@ namespace ProxyProject_Backend.Controllers
                     EndUsingTime = proxy.EndUsingTime,
                     CountryName = proxy.ProxyKeyPlan.Name,
                     CountryCode = proxy.ProxyKeyPlan.Code,
-                    ProxyKeyPlanId= proxy.ProxyKeyPlan.Id
+                    ProxyKeyPlanId= proxy.ProxyKeyPlan.Id,
+                    IsUse = proxy.UsingByKey != null ? 1: 2
                 }),
                 Total = await _unitOfWork.ProxyRepository.CountByFilterAsync()
             });

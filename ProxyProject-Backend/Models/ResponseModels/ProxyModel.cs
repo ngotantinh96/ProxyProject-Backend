@@ -9,5 +9,6 @@
         public Guid ProxyKeyPlanId { get; set; }
         public string CountryName { get; set; }
         public string CountryCode { get; set; }
+        public int IsUse { get;set; }
     }
 }
