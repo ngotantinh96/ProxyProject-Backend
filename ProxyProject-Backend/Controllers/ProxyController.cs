@@ -114,8 +114,8 @@ namespace ProxyProject_Backend.Controllers
             { 
                 if (model.IsUse != null && model.IsUse > 0)
                 {
-                    if (model.IsUse == 1) filter = (x) => !string.IsNullOrWhiteSpace(x.UsingByKey) && x.Proxy.Contains(model.Keyword);
-                    else filter = (x) => string.IsNullOrWhiteSpace(x.UsingByKey) && x.Proxy.Contains(model.Keyword);
+                    if (model.IsUse == 1) filter = (x) => x.EndUsingTime >= DateTime.UtcNow && x.Proxy.Contains(model.Keyword);
+                    else filter = (x) => (x.EndUsingTime  == null || x.EndUsingTime.Value < DateTime.UtcNow) && x.Proxy.Contains(model.Keyword);
                 }
                 else
                 {
@@ -126,8 +126,8 @@ namespace ProxyProject_Backend.Controllers
             {
                 if (model.IsUse != null && model.IsUse > 0)
                 {
-                    if (model.IsUse == 1) filter = (x) => !string.IsNullOrWhiteSpace(x.UsingByKey);
-                    else filter = (x) => string.IsNullOrWhiteSpace(x.UsingByKey);
+                    if (model.IsUse == 1) filter = (x) => x.EndUsingTime >= DateTime.UtcNow;
+                    else filter = (x) => (x.EndUsingTime == null || x.EndUsingTime.Value < DateTime.UtcNow);
                 }
             }
             var notifications = await _unitOfWork.ProxyRepository
@@ -145,7 +145,7 @@ namespace ProxyProject_Backend.Controllers
                     CountryName = proxy.ProxyKeyPlan.Name,
                     CountryCode = proxy.ProxyKeyPlan.Code,
                     ProxyKeyPlanId= proxy.ProxyKeyPlan.Id,
-                    IsUse = proxy.UsingByKey != null ? 1: 2
+                    IsUse = proxy.EndUsingTime >= DateTime.UtcNow ? 1: 2
                 }),
                 Total = await _unitOfWork.ProxyRepository.CountByFilterAsync()
             });
