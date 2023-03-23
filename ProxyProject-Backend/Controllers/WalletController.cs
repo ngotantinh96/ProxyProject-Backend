@@ -68,6 +68,7 @@ namespace ProxyProject_Backend.Controllers
                     {
                         Balance = user.Balance,
                         TotalDeposited = user.TotalDeposited,
+                        BankMemo = user.UserName,
                         History = walletHistory.Select(x => new WalletHistoryModel
                         {
                             Id = x.Id,

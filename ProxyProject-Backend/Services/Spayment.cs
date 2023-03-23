@@ -80,7 +80,7 @@ namespace ProxyProject_Backend.Services
                     }
                     MomoType momoObj = JsonConvert.DeserializeObject<MomoType>(json);
 
-                    if (momoObj?.momoMsg != null && momoObj.momoMsg.tranList.Any())
+                    if (momoObj?.momoMsg != null && momoObj.momoMsg.tranList != null && momoObj.momoMsg.tranList.Any())
                     {
                         var transactionList = new List<TranList>();
                         if (transactionHistory == null || transactionHistory.Count == 0)
@@ -182,7 +182,7 @@ namespace ProxyProject_Backend.Services
         private UserEntity ConvertTransactionCommentToUser(string comment)
         {
             return !string.IsNullOrWhiteSpace(comment)
-                   ? _unitOfWork.UserRepository.GetByFilterAsync(x => string.Equals(x.UserName, comment.Trim(), StringComparison.OrdinalIgnoreCase)).Result
+                   ? _unitOfWork.UserRepository.GetByFilterAsync(x => x.UserName == comment.Trim().ToUpper()).Result
                    : null;
         }
         private void GetVCBBank(BankAccountEntity bank, List<TransactionHistoryEntity> transactionHistory)
