@@ -109,7 +109,8 @@ namespace ProxyProject_Backend.DAL
             builder.Entity<GlobalConfigurationEntity>().HasData(new GlobalConfigurationEntity
             {
                 Id = new Guid("6bec4da2-3132-4475-934a-c33d4fa9d451"),
-                TwoFactorEnabled = true
+                TwoFactorEnabled = true,
+                LimitPage = 5
             });
         }
 

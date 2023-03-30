@@ -185,6 +185,7 @@ namespace ProxyProject_Backend.Services
                    ? _unitOfWork.UserRepository.GetByFilterAsync(x => x.UserName == comment.Trim().ToUpper()).Result
                    : null;
         }
+
         private void GetVCBBank(BankAccountEntity bank, List<TransactionHistoryEntity> transactionHistory)
         {
             string endpoint = !string.IsNullOrWhiteSpace(bank.ApiLink) ? bank.ApiLink : "https://api.spayment.vn/historyapivcb/password/sotaikhoan/token";

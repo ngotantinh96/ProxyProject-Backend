@@ -73,5 +73,34 @@ namespace ProxyProject_Backend.Controllers
                 Message = "Error happened. Please try again."
             });
         }
+
+        [HttpPatch]
+        [Route("UpdatePageLimit")]
+        public async Task<IActionResult> UpdatePageLimit(int limitPage)
+        {
+            var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
+
+            if (globalConfiguration != null && limitPage > 0 && limitPage <= 150)
+            {
+                globalConfiguration.LimitPage = limitPage;
+                _unitOfWork.GlobalConfigurationRepository.Update(globalConfiguration);
+                await _unitOfWork.SaveChangesAsync();
+
+                return Ok(new ResponseModel
+                {
+                    Status = "Success",
+                    Data = new GlobalConfigurationModel
+                    {
+                        TwoFactorEnabled = globalConfiguration.TwoFactorEnabled,
+                    }
+                });
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel
+            {
+                Status = "Error",
+                Message = "Error happened. Please try again."
+            });
+        }
     }
 }
