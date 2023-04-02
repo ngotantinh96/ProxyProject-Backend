@@ -26,19 +26,29 @@ namespace ProxyProject_Backend.Controllers
             _proxyKeyService = proxyKeyService;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("ChangeProxy")]
         public async Task<IActionResult> ChangeProxy(string proxyKey)
         {
             var proxyKeyInfo = await _unitOfWork.ProxyKeysRepository.GetByFilterAsync(x => x.Key == proxyKey);
+            
 
             if (proxyKeyInfo != null)
             {
-                var proxyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(proxyKeyInfo.ProxyKeyPlanId);
+                if (proxyKeyInfo.ExpireDate <= DateTime.UtcNow)
+                {
+                    return BadRequest(new IntegrationCommonResponseModel
+                    {
+                        Success = false,
+                        Description = "Proxy key is expire!"
+                    });
+                }
+                    var proxyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(proxyKeyInfo.ProxyKeyPlanId);
 
                 if(proxyPlan != null)
                 {
-                    var proxy = await _unitOfWork.ProxyRepository.GetByFilterAsync(x => x.UsingByKey == proxyKeyInfo.Key);
+                    var proxy = _unitOfWork.ProxyRepository
+                        .GetAsync(x => x.UsingByKey == proxyKeyInfo.Key, x => x.OrderByDescending(_ =>_.StartUsingTime), string.Empty, 0 ,1).Result.FirstOrDefault();
 
                     if (proxy != null && proxy.EndUsingTime > DateTime.UtcNow)
                     {

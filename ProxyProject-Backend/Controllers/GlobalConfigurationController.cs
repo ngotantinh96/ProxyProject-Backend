@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProxyProject_Backend.DAL;
 using ProxyProject_Backend.DAL.Entities;
+using ProxyProject_Backend.Models.RequestModels;
 using ProxyProject_Backend.Models.Response;
 
 namespace ProxyProject_Backend.Controllers
@@ -34,6 +35,7 @@ namespace ProxyProject_Backend.Controllers
                     Data = new GlobalConfigurationModel
                     {
                         TwoFactorEnabled = globalConfiguration.TwoFactorEnabled,
+                        LimitPage= globalConfiguration.LimitPage,
                     }
                 });
             }
@@ -46,43 +48,15 @@ namespace ProxyProject_Backend.Controllers
         }
 
         [HttpPatch]
-        [Route("ToggleTwoFactor")]
-        public async Task<IActionResult> ToggleTwoFactor()
+        [Route("")]
+        public async Task<IActionResult> UpdateSetting([FromBody] ConfigurationRequestModel model)
         {
             var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
 
             if (globalConfiguration != null)
             {
-                globalConfiguration.TwoFactorEnabled = !globalConfiguration.TwoFactorEnabled;
-                _unitOfWork.GlobalConfigurationRepository.Update(globalConfiguration);
-                await _unitOfWork.SaveChangesAsync();
-
-                return Ok(new ResponseModel
-                {
-                    Status = "Success",
-                    Data = new GlobalConfigurationModel
-                    {
-                        TwoFactorEnabled = globalConfiguration.TwoFactorEnabled,
-                    }
-                });
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel
-            {
-                Status = "Error",
-                Message = "Error happened. Please try again."
-            });
-        }
-
-        [HttpPatch]
-        [Route("UpdatePageLimit")]
-        public async Task<IActionResult> UpdatePageLimit(int limitPage)
-        {
-            var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
-
-            if (globalConfiguration != null && limitPage > 0 && limitPage <= 150)
-            {
-                globalConfiguration.LimitPage = limitPage;
+                globalConfiguration.TwoFactorEnabled = model.TwoFactAuthen;
+                globalConfiguration.LimitPage= model.LimitPage;
                 _unitOfWork.GlobalConfigurationRepository.Update(globalConfiguration);
                 await _unitOfWork.SaveChangesAsync();
 

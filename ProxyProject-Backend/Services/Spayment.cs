@@ -201,9 +201,18 @@ namespace ProxyProject_Backend.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var json = response.Content.ReadAsStringAsync().Result;
-                    RootObject vcbObj = JsonConvert.DeserializeObject<RootObject>(json);
+                    RootObject vcbObj = null;
+                    try
+                    {
+                        vcbObj = JsonConvert.DeserializeObject<RootObject>(json);
+                    }
+                    catch (Exception ex)
+                    {
 
-                    if (vcbObj.data != null && vcbObj.data.ChiTietGiaoDich.Any())
+                        Console.WriteLine(ex);
+                    }
+
+                    if (vcbObj?.data != null && vcbObj.data.ChiTietGiaoDich.Any())
                     {
                         var transactionList = new List<ChiTietGiaoDich>();
                         if (transactionHistory == null || transactionHistory.Count == 0)
