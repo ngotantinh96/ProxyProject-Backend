@@ -73,7 +73,11 @@ namespace ProxyProject_Backend.Controllers
                         var proxies = await _unitOfWork.ProxyRepository.GetAsync(x => x.ProxyKeyPlanId == proxyPlan.Id
                                 && !proxyHistories.Select(x => x.ProxyId).Any(p => p == x.Id)
                                 && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "", 0, 1);
-
+                        if (!proxies.Any())
+                        {
+                            proxies = await _unitOfWork.ProxyRepository.GetAsync(x => x.ProxyKeyPlanId == proxyPlan.Id
+                                && (!x.StartUsingTime.HasValue || x.EndUsingTime <= DateTime.UtcNow), x => x.OrderBy(p => p.StartUsingTime), "", 0, 1);
+                        }
                         if (proxies.Any())
                         {
                             var proxyChangeTime = double.Parse(_configuration["ProxyChangeTime"]);
