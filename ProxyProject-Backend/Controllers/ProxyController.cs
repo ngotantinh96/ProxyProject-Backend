@@ -109,7 +109,6 @@ namespace ProxyProject_Backend.Controllers
         public async Task<IActionResult> GetProxies([FromQuery] GetListPagingModel model)
         {
             Expression<Func<ProxyEntity, bool>> filter = null;
-            Expression<Func<ProxyEntity, bool>> isUse = null;
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             { 
                 if (model.IsUse != null && model.IsUse > 0)

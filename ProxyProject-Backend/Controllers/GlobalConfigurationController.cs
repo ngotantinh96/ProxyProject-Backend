@@ -36,6 +36,7 @@ namespace ProxyProject_Backend.Controllers
                     {
                         TwoFactorEnabled = globalConfiguration.TwoFactorEnabled,
                         LimitPage= globalConfiguration.LimitPage,
+                        ProxyChangeTime = globalConfiguration.ProxyChangeTime
                     }
                 });
             }
@@ -57,6 +58,7 @@ namespace ProxyProject_Backend.Controllers
             {
                 globalConfiguration.TwoFactorEnabled = model.TwoFactAuthen;
                 globalConfiguration.LimitPage= model.LimitPage;
+                globalConfiguration.ProxyChangeTime = model.ProxyChangeTime;
                 _unitOfWork.GlobalConfigurationRepository.Update(globalConfiguration);
                 await _unitOfWork.SaveChangesAsync();
 

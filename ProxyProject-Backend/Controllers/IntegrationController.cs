@@ -52,6 +52,7 @@ namespace ProxyProject_Backend.Controllers
 
                     if (proxy != null && proxy.EndUsingTime > DateTime.UtcNow)
                     {
+                        var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
                         return Ok(new IntegrationResponseModel
                         {
                             Success = true,
@@ -60,7 +61,7 @@ namespace ProxyProject_Backend.Controllers
                             {
                                 Proxy = proxy.Proxy,
                                 Country = proxyPlan.Name,
-                                NextChange = double.Parse(_configuration["ProxyChangeTime"]),
+                                NextChange = globalConfiguration.ProxyChangeTime,
                                 Timeout = (proxy.EndUsingTime - DateTime.UtcNow).Value.TotalSeconds
                             }
                         });
@@ -80,7 +81,8 @@ namespace ProxyProject_Backend.Controllers
                         }
                         if (proxies.Any())
                         {
-                            var proxyChangeTime = double.Parse(_configuration["ProxyChangeTime"]);
+                            var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
+                            var proxyChangeTime = globalConfiguration.ProxyChangeTime;
 
                             var startUsingTime = DateTime.UtcNow;
                             var endUsingTime = startUsingTime.AddSeconds(proxyChangeTime);
@@ -149,7 +151,7 @@ namespace ProxyProject_Backend.Controllers
             if (proxy != null)
             {
                 var proxyPlan = await _unitOfWork.ProxyKeyPlansRepository.GetByIDAsync(proxy.ProxyKeyPlanId);
-
+                var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
                 return Ok(new IntegrationResponseModel
                 {
                     Success = true,
@@ -158,7 +160,7 @@ namespace ProxyProject_Backend.Controllers
                     {
                         Proxy = proxy.Proxy,
                         Country = proxyPlan?.Name,
-                        NextChange = double.Parse(_configuration["ProxyChangeTime"]),
+                        NextChange = globalConfiguration.ProxyChangeTime,
                         Timeout = (proxy.EndUsingTime - DateTime.UtcNow).Value.TotalSeconds >= 0 ? (proxy.EndUsingTime - DateTime.UtcNow).Value.TotalSeconds : 0
                     }
                 });

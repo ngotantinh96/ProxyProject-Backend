@@ -4,5 +4,6 @@
     {
         public bool TwoFactAuthen { get; set; }
         public int LimitPage { get; set; }
+        public int ProxyChangeTime { get; set; }
     }
 }

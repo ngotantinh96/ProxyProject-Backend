@@ -4,5 +4,6 @@
     {
         public bool TwoFactorEnabled { get; set; }
         public int LimitPage { get; set; }
+        public double ProxyChangeTime { get; set; }
     }
 }
