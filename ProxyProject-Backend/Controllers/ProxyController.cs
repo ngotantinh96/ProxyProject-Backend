@@ -113,8 +113,9 @@ namespace ProxyProject_Backend.Controllers
             { 
                 if (model.IsUse != null && model.IsUse > 0)
                 {
-                    if (model.IsUse == 1) filter = (x) => x.EndUsingTime >= DateTime.UtcNow && x.Proxy.Contains(model.Keyword);
-                    else filter = (x) => (x.EndUsingTime  == null || x.EndUsingTime.Value < DateTime.UtcNow) && x.Proxy.Contains(model.Keyword);
+                    if (model.IsUse == 1) filter = (x) => x.EndUsingTime != null && x.EndUsingTime < DateTime.UtcNow && x.Proxy.Contains(model.Keyword); // Đã được suer dụng
+                    else if (model.IsUse == 2) filter = (x) => (x.EndUsingTime == null && x.Proxy.Contains(model.Keyword)) ; // Chưa được sử dụng
+                    else filter = (x) => (x.EndUsingTime != null && x.EndUsingTime >= DateTime.UtcNow && x.Proxy.Contains(model.Keyword)); // Đang được sử dụng
                 }
                 else
                 {
@@ -125,11 +126,12 @@ namespace ProxyProject_Backend.Controllers
             {
                 if (model.IsUse != null && model.IsUse > 0)
                 {
-                    if (model.IsUse == 1) filter = (x) => x.EndUsingTime >= DateTime.UtcNow;
-                    else filter = (x) => (x.EndUsingTime == null || x.EndUsingTime.Value < DateTime.UtcNow);
+                    if (model.IsUse == 1) filter = (x) => x.EndUsingTime != null && x.EndUsingTime < DateTime.UtcNow; // Đã được suer dụng
+                    else if(model.IsUse == 2) filter = (x) => (x.EndUsingTime == null); // Chưa được sử dụng
+                    else filter = (x) => (x.EndUsingTime != null && x.EndUsingTime >= DateTime.UtcNow); // Đang được sử dụng
                 }
             }
-            var notifications = await _unitOfWork.ProxyRepository
+             var notifications = await _unitOfWork.ProxyRepository
                      .GetAsync(filter, x => x.OrderBy(p => p.Proxy), "ProxyKeyPlan", model.PageIndex, model.PageSize);
 
             return Ok(new ResponseModel
@@ -144,9 +146,9 @@ namespace ProxyProject_Backend.Controllers
                     CountryName = proxy.ProxyKeyPlan.Name,
                     CountryCode = proxy.ProxyKeyPlan.Code,
                     ProxyKeyPlanId= proxy.ProxyKeyPlan.Id,
-                    IsUse = proxy.EndUsingTime >= DateTime.UtcNow ? 1: 2
+                    IsUse = proxy.EndUsingTime == null ? 2 : proxy.EndUsingTime >= DateTime.UtcNow ? 3 : 1
                 }),
-                Total = await _unitOfWork.ProxyRepository.CountByFilterAsync()
+                Total = await _unitOfWork.ProxyRepository.CountByFilterAsync(filter)
             });
         }
 
