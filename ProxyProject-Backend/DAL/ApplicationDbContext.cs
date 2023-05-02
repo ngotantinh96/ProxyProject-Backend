@@ -118,6 +118,7 @@ namespace ProxyProject_Backend.DAL
         public DbSet<ProxyKeysEntity> ProxyKeys { get; set; }
         public DbSet<ProxyEntity> Proxy { get; set; }
         public DbSet<WalletHistoryEntity> WalletHistory { get; set; }
+        public DbSet<VerificationCodeEntity> VerificationCodes { get; set; }
         public DbSet<BankAccountEntity> BankAccounts { get; set; }
         public DbSet<NotificationEntity> Notifications { get; set; }
         public DbSet<TransactionHistoryEntity> TransactionHistories { get; set; }

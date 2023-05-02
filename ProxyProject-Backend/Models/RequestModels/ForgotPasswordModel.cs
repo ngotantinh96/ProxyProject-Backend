@@ -7,4 +7,9 @@ namespace ProxyProject_Backend.Models.RequestModels
         [Required(ErrorMessage = "Email is required")]
         public string Email { get; set; }
     }
+
+    public class ResetForgotPasswordModel : ForgotPasswordModel
+    {
+        public string Code { get; set; }
+    }
 }

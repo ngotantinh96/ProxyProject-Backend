@@ -13,6 +13,7 @@ namespace ProxyProject_Backend.DAL
         private GenericRepository<UserEntity> _userRepository;
         private GenericRepository<ProxyKeyPlansEntity> _proxyKeyPlansRepository;
         private GenericRepository<ProxyKeysEntity> _proxyKeysRepository;
+        private GenericRepository<VerificationCodeEntity> _verificationCodeRepository;
         private GenericRepository<WalletHistoryEntity> _walletHistoryRepository;
         private GenericRepository<BankAccountEntity> _bankAccountRepository;
         private GenericRepository<NotificationEntity> _notificationRepository;
@@ -54,6 +55,18 @@ namespace ProxyProject_Backend.DAL
                     _proxyKeysRepository = new GenericRepository<ProxyKeysEntity>(_context);
                 }
                 return _proxyKeysRepository;
+            }
+        }
+
+        public GenericRepository<VerificationCodeEntity> VerificationCodeRepository
+        {
+            get
+            {
+                if (_verificationCodeRepository == null)
+                {
+                    _verificationCodeRepository = new GenericRepository<VerificationCodeEntity>(_context);
+                }
+                return _verificationCodeRepository;
             }
         }
 

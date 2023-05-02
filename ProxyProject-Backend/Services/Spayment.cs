@@ -43,17 +43,25 @@ namespace ProxyProject_Backend.Services
             var bankAccountDb = _unitOfWork.BankAccountRepository.GetAsync(x => !x.IsMaintainance).GetAwaiter().GetResult();
             bankAccountDb.ForEach((bank) =>
             {
-                var transactionHistory = _unitOfWork.TransactionHistoryRepository
-                .GetAsync(p => p.BankId == bank.Id, p => p.OrderByDescending(t => t.TransactionDate), "", 0, 1).GetAwaiter().GetResult();
+                List<TransactionHistoryEntity> transactionHistory = null;
                 switch (bank.BankName.ToUpper())
                 {
                     case "MOMO":
+                        transactionHistory = _unitOfWork.TransactionHistoryRepository
+                .GetAsync(p => p.BankId == bank.Id && p.BankType == "MOMO", p => p.OrderByDescending(t => t.TransactionDate), "", 0, 1).GetAwaiter().GetResult();
                         GetMomoBank(bank, transactionHistory);
                         break;
                     case "VIETCOMBANK":
+                        transactionHistory = _unitOfWork.TransactionHistoryRepository
+                .GetAsync(p => p.BankId == bank.Id && p.BankType == "VIETCOMBANK", p => p.OrderByDescending(t => t.CreatedDate), "", 0, 1).GetAwaiter().GetResult();
+
+                       var transactionHistory1 = _unitOfWork.TransactionHistoryRepository
+                .GetAsync(p => p.BankId == bank.Id && p.BankType == "VIETCOMBANK", p => p.OrderByDescending(t => t.TransactionDate), "", 0, 0).GetAwaiter().GetResult();
                         GetVCBBank(bank, transactionHistory);
                         break;
                     case "ACBBANK":
+                        transactionHistory = _unitOfWork.TransactionHistoryRepository
+                .GetAsync(p => p.BankId == bank.Id && p.BankType == "ACBBANK", p => p.OrderByDescending(t => t.TransactionDate), "", 0, 1).GetAwaiter().GetResult();
                         GetACBBank(bank, transactionHistory);
                         break;
                 }
@@ -186,10 +194,22 @@ namespace ProxyProject_Backend.Services
                    : null;
         }
 
+        private UserEntity ConvertTransactionCommentToUserVCB(string comment)
+        {
+            if (!string.IsNullOrEmpty(comment))
+            {
+                var userComment = comment.Split('.')[2];
+                var user = _unitOfWork.UserRepository.GetByFilterAsync(x => x.UserName == userComment.Trim().ToUpper()).Result;
+                return user;
+            }
+
+            return null;
+        }
+
         private void GetVCBBank(BankAccountEntity bank, List<TransactionHistoryEntity> transactionHistory)
         {
             string endpoint = !string.IsNullOrWhiteSpace(bank.ApiLink) ? bank.ApiLink : "https://api.spayment.vn/historyapivcb/password/sotaikhoan/token";
-            string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "39D6670A-1B9A-A12B-ADB0-DB020B35F5CF";
+            string token = !string.IsNullOrWhiteSpace(bank.Token) ? bank.Token : "0FA85AB2-A498-45FD-4891-8917327F0052";
             string userName = !string.IsNullOrWhiteSpace(bank.AccountName) ? bank.AccountName : string.Empty;
             string bankNumber = !string.IsNullOrWhiteSpace(bank.AccountNumber) ? bank.AccountNumber : "123456789123";
             string password = !string.IsNullOrWhiteSpace(bank.Password) ? StringUtils.Decrypt(bank.Password, _configuration["PasswordEncryptKey"]) : bank.Password;
@@ -221,18 +241,21 @@ namespace ProxyProject_Backend.Services
                         }
                         else
                         {
-                            transactionList = vcbObj.data.ChiTietGiaoDich
-                            .Where(_ => DateTime.ParseExact(_.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) >= transactionHistory
-                            .FirstOrDefault().TransactionDate
-                            && _.CD == "+"
-                            && _.SoThamChieu.ToString() != transactionHistory
-                            .FirstOrDefault().TransactionId).ToList();
+                            var lastTransaction = transactionHistory.FirstOrDefault();
+                            var index = vcbObj.data.ChiTietGiaoDich.FindIndex(x => x.SoThamChieu == lastTransaction.TransactionId);
+                            if(index > -1)
+                            {
+                                for (int i = 0; i < index; i++)
+                                {
+                                    transactionList.Add(vcbObj.data.ChiTietGiaoDich[i]);
+                                }
+                            }
                         }
 
                         // Save DB
                         transactionList.ForEach(transaction =>
                         {
-                            var user = ConvertTransactionCommentToUser(transaction.MoTa);
+                            var user = ConvertTransactionCommentToUserVCB(transaction.MoTa);
 
                             if (user != null)
                             {
@@ -243,8 +266,10 @@ namespace ProxyProject_Backend.Services
                                     BankAccount = transaction.SoThamChieu,
                                     BankId = bank.Id,
                                     BankType = "VIETCOMBANK",
-                                    TransactionDate = DateTime.ParseExact(transaction.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                    Amount = Convert.ToDecimal(transaction.SoTienGhiCo?.Replace(",", "")),
+                                    TransactionDate = DateTime.ParseExact(transaction.NgayGiaoDich, "dd/MM/yyyy", CultureInfo.InvariantCulture),
                                     Comment = transaction.MoTa,
+                                    CreatedDate = DateTime.UtcNow,
                                     Status = user == null ? EnumTransactionStatus.FAIL : EnumTransactionStatus.SUCCESS,
                                     UserId = user.Id,
                                 }).GetAwaiter();
@@ -277,9 +302,11 @@ namespace ProxyProject_Backend.Services
                                     TransactionId = transaction.SoThamChieu,
                                     Name = transaction.SoThamChieu,
                                     BankAccount = transaction.SoThamChieu,
+                                    Amount = Convert.ToDecimal(transaction.SoTienGhiCo?.Replace(",","")),
                                     BankType = "VIETCOMBANK",
                                     BankId = bank.Id,
-                                    TransactionDate = DateTime.ParseExact(transaction.NgayGiaoDich, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                    CreatedDate = DateTime.UtcNow,
+                                    TransactionDate = DateTime.ParseExact(transaction.NgayGiaoDich, "dd/MM/yyyy", CultureInfo.InvariantCulture),
                                     Comment = transaction.MoTa,
                                     Status = EnumTransactionStatus.FAIL,
                                 }).GetAwaiter();

@@ -27,14 +27,14 @@ namespace ProxyProject_Backend.Controllers
         public async Task<IActionResult> GetTransactionHistory([FromQuery] GetTransactionHistoryRequestModel request)
         {
             Expression<Func<TransactionHistoryEntity, bool>> filter = null;
-            Func<IQueryable<TransactionHistoryEntity>, IOrderedQueryable<TransactionHistoryEntity>> orderBy = (x) => x.OrderByDescending(p => p.TransactionDate);
+            Func<IQueryable<TransactionHistoryEntity>, IOrderedQueryable<TransactionHistoryEntity>> orderBy = (x) => x.OrderByDescending(p => p.CreatedDate);
 
             if (!string.IsNullOrWhiteSpace(request.Keyword))
             {
                 filter = (x) => x.BankType.Contains(request.Keyword);
             }
 
-            var result = await _unitOfWork.TransactionHistoryRepository.GetAsync(filter, orderBy,"User",request.Page, request.Size ?? 10);
+            var result = await _unitOfWork.TransactionHistoryRepository.GetAsync(filter, orderBy,"User",request.PageIndex, request.PageSize ?? 10);
 
             return Ok(new ResponseModel
             {

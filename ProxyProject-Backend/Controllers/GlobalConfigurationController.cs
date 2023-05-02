@@ -23,6 +23,7 @@ namespace ProxyProject_Backend.Controllers
 
         [HttpGet]
         [Route("GetGlobalConfiguration")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetGlobalConfiguration()
         {
             var globalConfiguration = await _unitOfWork.GlobalConfigurationRepository.GetByFilterAsync(x => true);
